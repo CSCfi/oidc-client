@@ -4,9 +4,9 @@ from elixir_oauth2 import __license__, __version__, __author__, __description__
 
 setup(name='elixir_oauth2',
       version=__version__,
-      url='https://elixir-aai-oauth2-client.rtfd.io/',
+      url='https://elixir-aai-oauth2-service.rtfd.io/',
       project_urls={
-          'Source': 'https://github.com/CSCfi/elixir-aai-oauth2-client',
+          'Source': 'https://github.com/CSCfi/elixir-aai-oauth2-service',
       },
       license=__license__,
       author=__author__,
@@ -18,7 +18,7 @@ setup(name='elixir_oauth2',
       package_data={'': ['*.json', '*.ini']},
       entry_points={
           'console_scripts': [
-              'elixir-client=elixir_oauth2.server:main'
+              'elixir-service=elixir_oauth2.server:main'
           ]
       },
       platforms='any',
