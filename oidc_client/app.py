@@ -1,7 +1,6 @@
 """OIDC Client Web Server."""
 
 import sys
-import logging
 import base64
 
 from cryptography import fernet
@@ -15,12 +14,8 @@ from .endpoints.logout import logout_request
 from .endpoints.callback import callback_request
 from .endpoints.token import token_request
 from .utils.utils import ssl_context
+from .utils.logging import LOG
 from .config import CONFIG
-
-FORMAT = '[%(asctime)s][%(name)s][%(process)d %(processName)s][%(levelname)-8s] (L:%(lineno)s) %(funcName)s: %(message)s'
-logging.basicConfig(format=FORMAT, datefmt='%Y-%m-%d %H:%M:%S')
-LOG = logging.getLogger(__name__)
-LOG.setLevel(logging.INFO)
 
 routes = web.RouteTableDef()
 
