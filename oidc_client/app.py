@@ -2,8 +2,13 @@
 
 import sys
 import logging
+import base64
+
+from cryptography import fernet
 
 from aiohttp import web
+from aiohttp_session import setup
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from .endpoints.login import login_request
 from .endpoints.logout import logout_request
@@ -56,7 +61,13 @@ async def token(request):
 
 def init():
     """Initialise web server."""
+    # Initialise server object
     server = web.Application()
+    # Setup an encrypted session storage for user data
+    fernet_key = fernet.Fernet.generate_key()
+    secret_key = base64.urlsafe_b64decode(fernet_key)
+    setup(server, EncryptedCookieStorage(secret_key))
+    # Gather endpoints
     server.router.add_routes(routes)
     return server
 

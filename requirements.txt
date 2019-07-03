@@ -1,2 +1,3 @@
 aiohttp
 aiohttp_session
+cryptography
