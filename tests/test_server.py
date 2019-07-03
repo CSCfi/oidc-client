@@ -1,7 +1,7 @@
 import unittest
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from aiohttp import web
-from elixir_oauth2.server import init, main
+from oidc_client.app import init, main
 from unittest import mock
 
 
@@ -16,11 +16,10 @@ class AppTestCase(AioHTTPTestCase):
         return init()
 
     @unittest_run_loop
-    async def test_health(self):
-        """Simplest test the health endpoint."""
-        resp = await self.client.request("GET", "/health")
+    async def test_index(self):
+        """Simplest test the root endpoint."""
+        resp = await self.client.request("GET", "/")
         assert 200 == resp.status
-        assert 'OK' == await resp.text()
 
 
 class TestBasicFunctionsApp(unittest.TestCase):
@@ -37,7 +36,7 @@ class TestBasicFunctionsApp(unittest.TestCase):
         """Remove setup variables."""
         pass
 
-    @mock.patch('elixir_oauth2.server.web')
+    @mock.patch('oidc_client.app.web')
     def test_main(self, mock_webapp):
         """Should start the webapp."""
         main()

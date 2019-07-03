@@ -1,24 +1,23 @@
 from setuptools import setup
-from elixir_oauth2 import __license__, __version__, __author__, __description__
+from oidc_client import __license__, __version__, __author__, __description__
 
 
-setup(name='elixir_oauth2',
+setup(name='oidc_client',
       version=__version__,
-      url='https://elixir-aai-oauth2-service.rtfd.io/',
+      url='https://oidc-client.rtfd.io/',
       project_urls={
-          'Source': 'https://github.com/CSCfi/elixir-aai-oauth2-service',
+          'Source': 'https://github.com/CSCfi/oidc-client',
       },
       license=__license__,
       author=__author__,
       author_email='',
       description=__description__,
       long_description="",
-      packages=['elixir_oauth2'],
-      # If any package contains *.json, include them:
-      package_data={'': ['*.json', '*.ini']},
+      packages=['oidc_client'],
+      package_data={'': ['*.ini']},
       entry_points={
           'console_scripts': [
-              'elixir-service=elixir_oauth2.server:main'
+              'oidc_client=app.server:main'
           ]
       },
       platforms='any',
@@ -31,18 +30,15 @@ setup(name='elixir_oauth2',
 
           # Indicate who your project is intended for
           'Intended Audience :: Developers',
-          'Intended Audience :: Healthcare Industry',
           'Intended Audience :: Information Technology',
           'Topic :: Internet :: WWW/HTTP :: HTTP Servers',
-          'Topic :: Scientific/Engineering :: Bio-Informatics',
 
           # Pick your license as you wish
           'License :: OSI Approved :: Apache Software License',
 
           'Programming Language :: Python :: 3.6',
       ],
-      install_requires=['aiohttp', 'asyncpg', 'python-jose[cryptography]',
-                        'jsonschema==3.0.0', 'gunicorn'],
+      install_requires=['aiohttp'],
       extras_require={
           'test': ['coverage', 'pytest', 'pytest-cov',
                    'coveralls', 'testfixtures', 'tox',

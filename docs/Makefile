@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = elixir_oauth2
+SPHINXPROJ    = oidc_client
 SOURCEDIR     = .
 BUILDDIR      = _build
 

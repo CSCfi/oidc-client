@@ -1,5 +1,5 @@
-Elixir AAI OAuth2 client
-========================
+OIDC Client
+===========
 
 
 
