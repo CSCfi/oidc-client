@@ -4,7 +4,7 @@ import urllib.parse
 
 from aiohttp import web
 
-from ..utils.utils import get_from_session
+from ..utils.utils import generate_state
 from ..utils.logging import LOG
 from ..config import CONFIG
 
@@ -17,14 +17,15 @@ async def login_request(request):
     params = {
         'client_id': CONFIG.aai['client_id'],
         'response_type': 'code',
-        'state': await get_from_session(request, 'csrf'),
+        'state': await generate_state(request),
         'redirect_uri': CONFIG.aai['url_callback'],
         'duration': 'temporary',
-        'scope': CONFIG.aai['scope']
+        'scope': ' '.join(CONFIG.aai['scope'].split(','))
     }
 
     # Craft authorisation URL
     url = f"{CONFIG.aai['url_auth']}?{urllib.parse.urlencode(params)}"
 
-    # Redirect user to remote AAI server for authentication
+    # raise web.HTTPFound('localhost:8000/callback')
+    # Redirect user to remote AAI server for authentication, this does a 302 redirect
     raise web.HTTPFound(url)
