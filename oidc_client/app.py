@@ -14,6 +14,7 @@ from .endpoints.logout import logout_request
 from .endpoints.callback import callback_request
 from .endpoints.token import token_request
 from .utils.utils import ssl_context
+from .utils.middlewares import user_session
 from .utils.logging import LOG
 from .config import CONFIG
 
@@ -56,19 +57,27 @@ async def token(request):
 
 def init():
     """Initialise web server."""
+    LOG.info('Initialise web server.')
+
     # Initialise server object
     server = web.Application()
+
     # Setup an encrypted session storage for user data
-    fernet_key = fernet.Fernet.generate_key()
-    secret_key = base64.urlsafe_b64decode(fernet_key)
+    secret_key = base64.urlsafe_b64decode(fernet.Fernet.generate_key())
     setup(server, EncryptedCookieStorage(secret_key))
+
+    # Add middleware for session handling
+    server.middlewares.append(user_session())
+
     # Gather endpoints
     server.router.add_routes(routes)
+
     return server
 
 
 def main():
     """Start web server."""
+    LOG.info('Start web server.')
     web.run_app(init(),
                 host=CONFIG.app['host'],
                 port=CONFIG.app['port'],
@@ -77,7 +86,8 @@ def main():
 
 
 if __name__ == '__main__':
+    LOG.info('Starting OIDC Client Web API.')
     if sys.version_info < (3, 6):
-        LOG.error("oidc-client requires python 3.6+")
+        LOG.error('oidc-client requires python 3.6+')
         sys.exit(1)
     main()
