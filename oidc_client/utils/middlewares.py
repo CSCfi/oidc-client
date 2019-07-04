@@ -1,11 +1,8 @@
 """API Middlewares."""
 
-from functools import wraps
-
 from aiohttp import web
 from aiohttp_session import get_session
 
-from .utils import start_session
 from .logging import LOG
 
 
@@ -20,10 +17,7 @@ def user_session():
 
         # Check if user has an active session
         session = await get_session(request)
-
-        # If user didn't have an active session, initiate one
-        if not session:
-            await start_session(request)
+        LOG.debug(session)
 
         return await handler(request)
 

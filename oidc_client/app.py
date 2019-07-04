@@ -14,7 +14,7 @@ from .endpoints.logout import logout_request
 from .endpoints.callback import callback_request
 from .endpoints.token import token_request
 from .utils.utils import ssl_context
-from .utils.middlewares import user_session
+# from .utils.middlewares import user_session
 from .utils.logging import LOG
 from .config import CONFIG
 
@@ -67,7 +67,7 @@ def init():
     setup(server, EncryptedCookieStorage(secret_key))
 
     # Add middleware for session handling
-    server.middlewares.append(user_session())
+    # server.middlewares.append(user_session())
 
     # Gather endpoints
     server.router.add_routes(routes)
