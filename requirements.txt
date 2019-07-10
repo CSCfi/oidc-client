@@ -1,3 +1,5 @@
 aiohttp
 aiohttp_session
 cryptography
+gunicorn
+uvloop

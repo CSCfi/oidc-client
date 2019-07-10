@@ -13,11 +13,11 @@ setup(name='oidc_client',
       author_email='',
       description=__description__,
       long_description="",
-      packages=['oidc_client'],
+      packages=['oidc_client', 'oidc_client/config', 'oidc_client/endpoints', 'oidc_client/utils'],
       package_data={'': ['*.ini']},
       entry_points={
           'console_scripts': [
-              'oidc_client=app.server:main'
+              'start_oidc_client=oidc_client.app:main'
           ]
       },
       platforms='any',
@@ -38,7 +38,7 @@ setup(name='oidc_client',
 
           'Programming Language :: Python :: 3.6',
       ],
-      install_requires=['aiohttp'],
+      install_requires=['aiohttp', 'aiohttp_session', 'cryptography', 'gunicorn', 'uvloop'],
       extras_require={
           'test': ['coverage', 'pytest', 'pytest-cov',
                    'coveralls', 'testfixtures', 'tox',

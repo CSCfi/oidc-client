@@ -55,7 +55,7 @@ async def token(request):
     await token_request(request)
 
 
-def init():
+async def init():
     """Initialise web server."""
     LOG.info('Initialise web server.')
 
