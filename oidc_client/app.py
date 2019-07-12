@@ -64,7 +64,11 @@ async def init():
 
     # Setup an encrypted session storage for user data
     secret_key = base64.urlsafe_b64decode(fernet.Fernet.generate_key())
-    setup(server, EncryptedCookieStorage(secret_key))
+    setup(server, EncryptedCookieStorage(secret_key,
+                                         domain=CONFIG.cookie['domain'],
+                                         max_age=CONFIG.cookie['lifetime'],
+                                         secure=CONFIG.cookie['secure'],
+                                         httponly=CONFIG.cookie['http_only']))
 
     # Add middleware for session handling
     # server.middlewares.append(user_session())

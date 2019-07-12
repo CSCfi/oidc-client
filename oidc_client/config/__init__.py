@@ -1,8 +1,10 @@
 """OIDC Client Configuration."""
 
 import os
+
 from configparser import ConfigParser
 from collections import namedtuple
+from distutils.util import strtobool
 
 
 def parse_config_file(path):
@@ -14,6 +16,12 @@ def parse_config_file(path):
             'host': os.environ.get('HOST', config.get('app', 'host')) or '0.0.0.0',
             'port': os.environ.get('PORT', config.get('app', 'port')) or 8080,
             'name': os.environ.get('NAME', config.get('app', 'name')) or 'oidc-client'
+        },
+        'cookie': {
+            'domain': os.environ.get('DOMAIN', config.get('cookie', 'domain')) or 'localhost',
+            'lifetime': int(os.environ.get('LIFETIME', config.get('cookie', 'lifetime'))) or 3600,
+            'secure': bool(strtobool(os.environ.get('SECURE', config.get('cookie', 'secure')))) or True,
+            'http_only': bool(strtobool(os.environ.get('HTTP_ONLY', config.get('cookie', 'http_only')))) or True
         },
         'aai': {
             'client_id': os.environ.get('CLIENT_ID', config.get('aai', 'client_id')) or 'public',
