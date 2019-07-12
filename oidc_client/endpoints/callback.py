@@ -1,21 +1,27 @@
 """Callback Endpoint."""
 
 from aiohttp import web
-from ..utils.utils import get_from_session
+from ..utils.utils import get_from_session, save_to_session, request_token, query_params
 from ..utils.logging import LOG
 
 
 async def callback_request(request):
     """Handle callback requests."""
     LOG.debug('Handle callback request.')
-    # LOG.debug(request)
+
+    # Read saved state from user session
     state = await get_from_session(request, 'state')
-    LOG.debug(f'from ses: {state}')
+    # Parse authorised state from AAI response
+    params = await query_params(request)
 
-    # LOG.debug(f'from req: {request.rel_url.get('state')}')
+    # Verify, that states match
+    if not state == params['state']:
+        raise web.HTTPForbidden(text='Bad user session.')
 
-    # return web.Response(body=f'state: {str(state)}')
-    LOG.debug(request)
-    LOG.debug(request.cookies)
-    LOG.debug(request.remote)
-    return web.Response(body='OK')
+    # Request access token from AAI server
+    access_token = await request_token(params['code'])
+
+    # Save the received access token to session for later use
+    await save_to_session(request, key='access_token', value=access_token)
+
+    return web.Response(body='Authentication completed. Later this will redirect the user to UI.')
