@@ -22,15 +22,16 @@ async def generate_state(request):
     LOG.debug('Generate a new state for authentication request.')
 
     # Start a new session when user logs in
-    session = await new_session(request)
+    await new_session(request)
 
-    # Generate a state for authentication request and store it
-    session['state'] = str(uuid4())
+    # Generate a state for authentication request
+    state = str(uuid4())
 
-    return session['state']
+    # Store state to user session
+    await save_to_session(request, key='state', value=state)
 
 
-async def get_from_session(request, value):
+async def get_from_session(request, key):
     """Get a desired value from session."""
     LOG.debug('Accessing user session to retrieve a value.')
 
@@ -38,10 +39,10 @@ async def get_from_session(request, value):
     session = await get_session(request)
 
     try:
-        LOG.debug(f'Returning session value for: {value}.')
-        return session[value]
+        LOG.debug(f'Returning session value for: {key}.')
+        return session[key]
     except KeyError as e:
-        LOG.error(f'Session has no value for {value}: {e}.')
+        LOG.error(f'Session has no value for {key}: {e}.')
         raise web.HTTPUnauthorized(text='Incomplete session. Please restart your session.')
     except Exception as e:
         LOG.error(f'Session has failed: {e}')

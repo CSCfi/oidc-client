@@ -6,7 +6,7 @@ import base64
 from cryptography import fernet
 
 from aiohttp import web
-from aiohttp_session import setup
+from aiohttp_session import session_middleware
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from .endpoints.login import login_request
@@ -59,16 +59,16 @@ async def init():
     """Initialise web server."""
     LOG.info('Initialise web server.')
 
-    # Initialise server object
-    server = web.Application()
-
     # Setup an encrypted session storage for user data
     secret_key = base64.urlsafe_b64decode(fernet.Fernet.generate_key())
-    setup(server, EncryptedCookieStorage(secret_key,
+    session_storage = session_middleware(EncryptedCookieStorage(secret_key,
                                          domain=CONFIG.cookie['domain'],
                                          max_age=CONFIG.cookie['lifetime'],
                                          secure=CONFIG.cookie['secure'],
                                          httponly=CONFIG.cookie['http_only']))
+
+    # Initialise server object
+    server = web.Application(middlewares=[session_storage])
 
     # Add middleware for session handling
     # server.middlewares.append(user_session())

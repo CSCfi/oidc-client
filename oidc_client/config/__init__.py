@@ -29,6 +29,7 @@ def parse_config_file(path):
             'url_auth': os.environ.get('URL_AUTH', config.get('aai', 'url_auth')) or None,
             'url_token': os.environ.get('URL_TOKEN', config.get('aai', 'url_token')) or None,
             'url_callback': os.environ.get('URL_CALLBACK', config.get('aai', 'url_callback')) or None,
+            'url_redirect': os.environ.get('URL_REDIRECT', config.get('aai', 'url_redirect')) or None,
             'scope': os.environ.get('SCOPE', config.get('aai', 'scope')) or 'openid'
         },
         'elixir': {

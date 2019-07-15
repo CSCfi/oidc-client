@@ -1,7 +1,9 @@
 """Callback Endpoint."""
 
 from aiohttp import web
+
 from ..utils.utils import get_from_session, save_to_session, request_token, query_params
+from ..config import CONFIG
 from ..utils.logging import LOG
 
 
@@ -24,4 +26,5 @@ async def callback_request(request):
     # Save the received access token to session for later use
     await save_to_session(request, key='access_token', value=access_token)
 
-    return web.Response(body='Authentication completed. Later this will redirect the user to UI.')
+    # return web.Response(body='Authentication completed. Later this will redirect the user to UI.')
+    raise web.HTTPFound(CONFIG.aai['url_redirect'])
