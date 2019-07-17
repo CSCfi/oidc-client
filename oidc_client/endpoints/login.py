@@ -32,7 +32,11 @@ async def login_request(request):
     response = web.HTTPSeeOther(url)
 
     # Save state to cookies
-    response = await save_to_cookies(response, key='oidc_state', value=state, lifetime=CONFIG.cookie['state_lifetime'])
+    response = await save_to_cookies(response,
+                                     key='oidc_state',
+                                     value=state,
+                                     lifetime=CONFIG.cookie['state_lifetime'],
+                                     http_only=CONFIG.cookie['http_only'])
 
     # Redirect user to remote AAI server for authentication, this does a 303 redirect
     raise response

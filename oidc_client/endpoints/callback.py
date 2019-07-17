@@ -27,6 +27,13 @@ async def callback_request(request):
     response = web.HTTPFound(CONFIG.aai['url_redirect'])
 
     # Save the received access token to cookies for later use
-    response = await save_to_cookies(response, key='access_token', value=access_token, lifetime=CONFIG.cookie['token_lifetime'])
+    response = await save_to_cookies(response,
+                                     key='access_token',
+                                     value=access_token,
+                                     lifetime=CONFIG.cookie['token_lifetime'],
+                                     http_only=CONFIG.cookie['http_only'])
+
+    # Save a logged-in cookie for UI purposes
+    response = await save_to_cookies(response, key='logged_in', value='True', lifetime=CONFIG.cookie['token_lifetime'], http_only=False)
 
     raise response

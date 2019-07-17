@@ -36,7 +36,7 @@ async def get_from_cookies(request, key):
         raise web.HTTPInternalServerError(text=f'500 Session has failed: {e}')
 
 
-async def save_to_cookies(response, key='key', value='value', lifetime=300):
+async def save_to_cookies(response, key='key', value='value', http_only=True, lifetime=300):
     """Save a given value to cookies."""
     LOG.debug(f'Save a value for {key} to cookies.')
 
@@ -45,7 +45,7 @@ async def save_to_cookies(response, key='key', value='value', lifetime=300):
                         domain=CONFIG.cookie['domain'],
                         max_age=lifetime,
                         secure=CONFIG.cookie['secure'],
-                        httponly=CONFIG.cookie['http_only'])
+                        httponly=http_only)
 
     return response
 
