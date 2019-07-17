@@ -38,7 +38,7 @@ setup(name='oidc_client',
 
           'Programming Language :: Python :: 3.6',
       ],
-      install_requires=['aiohttp', 'aiohttp_session', 'cryptography', 'gunicorn', 'uvloop'],
+      install_requires=['aiohttp', 'gunicorn', 'uvloop'],
       extras_require={
           'test': ['coverage', 'pytest', 'pytest-cov',
                    'coveralls', 'testfixtures', 'tox',

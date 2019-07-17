@@ -40,7 +40,7 @@ async def callback_request(request):
                                      lifetime=CONFIG.cookie['token_lifetime'],
                                      http_only=False)
 
-    # Check for bona fide 
+    # Check for bona fide
     bona_fide_status = await check_bona_fide(access_token)
     if bona_fide_status:
         # Save a bona fide cookie for UI purposes
