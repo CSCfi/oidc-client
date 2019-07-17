@@ -19,7 +19,8 @@ def parse_config_file(path):
         },
         'cookie': {
             'domain': os.environ.get('DOMAIN', config.get('cookie', 'domain')) or 'localhost',
-            'lifetime': int(os.environ.get('LIFETIME', config.get('cookie', 'lifetime'))) or 3600,
+            'token_lifetime': int(os.environ.get('TOKEN_LIFETIME', config.get('cookie', 'token_lifetime'))) or 3600,
+            'state_lifetime': int(os.environ.get('STATE_LIFETIME', config.get('cookie', 'state_lifetime'))) or 300,
             'secure': bool(strtobool(os.environ.get('SECURE', config.get('cookie', 'secure')))) or True,
             'http_only': bool(strtobool(os.environ.get('HTTP_ONLY', config.get('cookie', 'http_only')))) or True
         },

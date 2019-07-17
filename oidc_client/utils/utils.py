@@ -6,8 +6,6 @@ import aiohttp
 
 from aiohttp import web
 
-from aiohttp_session import get_session, new_session
-
 from ..config import CONFIG
 from .logging import LOG
 
@@ -17,47 +15,39 @@ def ssl_context():
     return None
 
 
-async def generate_state(request):
+async def generate_state():
     """Generate a state for authentication request and return the value for use."""
     LOG.debug('Generate a new state for authentication request.')
-
-    # Start a new session when user logs in
-    await new_session(request)
-
-    # Generate a state for authentication request
-    state = str(uuid4())
-
-    # Store state to user session
-    await save_to_session(request, key='state', value=state)
+    return str(uuid4())
 
 
-async def get_from_session(request, key):
-    """Get a desired value from session."""
-    LOG.debug('Accessing user session to retrieve a value.')
-
-    # Access session object
-    session = await get_session(request)
+async def get_from_cookies(request, key):
+    """Get a desired value from cookies."""
+    LOG.debug(f'Retrieve value for {key} from cookies.')
 
     try:
-        LOG.debug(f'Returning session value for: {key}.')
-        return session[key]
+        LOG.debug(f'Returning cookie value for: {key}.')
+        return request.cookies[key]
     except KeyError as e:
-        LOG.error(f'Session has no value for {key}: {e}.')
-        raise web.HTTPUnauthorized(text='Incomplete session. Please restart your session.')
+        LOG.error(f'Cookies has no value for {key}: {e}.')
+        raise web.HTTPUnauthorized(text='401 Uninitialised session.')
     except Exception as e:
-        LOG.error(f'Session has failed: {e}')
-        raise web.HTTPInternalServerError(text=f'Session has failed: {e}')
+        LOG.error(f'Failed to retrieve cookie: {e}')
+        raise web.HTTPInternalServerError(text=f'500 Session has failed: {e}')
 
 
-async def save_to_session(request, key='key', value='value'):
-    """Save given value to key in session."""
-    LOG.debug('Accessing user session to save a value.')
+async def save_to_cookies(response, key='key', value='value', lifetime=300):
+    """Save a given value to cookies."""
+    LOG.debug(f'Save a value for {key} to cookies.')
 
-    # Access session object
-    session = await get_session(request)
+    response.set_cookie(key,
+                        value,
+                        domain=CONFIG.cookie['domain'],
+                        max_age=lifetime,
+                        secure=CONFIG.cookie['secure'],
+                        httponly=CONFIG.cookie['http_only'])
 
-    # Save value to key
-    session[key] = value
+    return response
 
 
 async def request_token(code):
