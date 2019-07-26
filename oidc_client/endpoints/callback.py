@@ -11,14 +11,6 @@ async def callback_request(request):
     """Handle callback requests."""
     LOG.debug('Handle callback request.')
 
-    LOG.debug('-------------------------------------------')
-    LOG.debug(f'request: {request}')
-    LOG.debug(f'rel_url: {request.rel_url}')
-    LOG.debug(f'query: {request.query}')
-    LOG.debug(f'query_string: {request.query_string}')
-    LOG.debug(f'items: {request.items}')
-    LOG.debug('-------------------------------------------')
-
     # Read saved state from cookies
     state = await get_from_cookies(request, 'oidc_state')
     # Parse authorised state from AAI response
