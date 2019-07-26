@@ -87,7 +87,9 @@ async def query_params(request):
     """Parse query string params from path."""
     LOG.debug('Parse query params from AAI response.')
 
+    # Response from AAI must have the query params `state` and `code`
     if 'state' in request.query and 'code' in request.query:
+        LOG.debug('AAI response contained the correct params.')
         return {'state': request.query['state'], 'code': request.query['code']}
     else:
         LOG.error(f'AAI response is missing mandatory params, received: {request.query}')
