@@ -1,6 +1,0 @@
-pytest
-pytest-cov
-asynctest
-coveralls
-flake8
-flake8-docstrings
