@@ -1,10 +1,12 @@
 import asynctest
 
 from collections import namedtuple
-from unittest.mock import patch
+from unittest.mock import MagicMock
 
 from aiohttp import web
 from aioresponses import aioresponses
+
+from multidict import MultiDict
 
 from oidc_client.utils.utils import ssl_context, generate_state, get_from_cookies, save_to_cookies
 from oidc_client.utils.utils import request_token, query_params, check_bona_fide
@@ -105,15 +107,18 @@ class TestUtils(asynctest.TestCase):
     async def test_query_params(self):
         """Test parsing of query params."""
         # Test found mandatory params
-        # mandatory_params = {'state': 'happy', 'code': '123'}
-        # Figure out how to mock request.rel_url.query.items()
-        # with patch.object(web.Request, 'rel_url', return_value={}) as mock_request:
-        #     parsed_params = await query_params(mock_request)
-        #     assert parsed_params == mandatory_params
+        mandatory_params = {'state': 'happy', 'code': '123'}
+        request = MagicMock()
+        request.query = MultiDict([('code', '123'), ('state', 'happy'), ('add', 3)])
+
+        parsed_params = await query_params(request)
+
+        assert parsed_params == mandatory_params
         # Test missing mandatory params
-        with patch.object(web.Request, 'rel_url', return_value={}) as mock_request:
-            with self.assertRaises(web.HTTPBadRequest):
-                await query_params(mock_request)
+        miss_request = MagicMock()
+        miss_request.query = MultiDict([('missing', 'sad')])
+        with self.assertRaises(web.HTTPBadRequest):
+            await query_params(miss_request)
 
     @aioresponses()
     async def test_check_bona_fide(self, m):

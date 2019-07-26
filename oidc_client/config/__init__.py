@@ -13,7 +13,7 @@ def parse_config_file(path):
     config.read(path)
     config_vars = {
         'app': {
-            'host': os.environ.get('HOST', config.get('app', 'host')) or '0.0.0.0',
+            'host': os.environ.get('HOST', config.get('app', 'host')) or '0.0.0.0',  # nosec
             'port': os.environ.get('PORT', config.get('app', 'port')) or 8080,
             'name': os.environ.get('NAME', config.get('app', 'name')) or 'oidc-client'
         },
