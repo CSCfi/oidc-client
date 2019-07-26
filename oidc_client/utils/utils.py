@@ -88,7 +88,9 @@ async def query_params(request):
     LOG.debug('Parse query params from AAI response.')
 
     desired_params = ['state', 'code']
-    params = {k: v for k, v in request.rel_url.query.items() if k in desired_params}
+    params = {k: v for k, v in dict(request.query) if k in desired_params}
+
+    LOG.debug(params)
 
     # Response from AAI must have the query params `state` and `code`
     if 'state' in params and 'code' in params:
