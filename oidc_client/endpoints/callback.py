@@ -24,7 +24,7 @@ async def callback_request(request):
     access_token = await request_token(params['code'])
 
     # Prepare response
-    response = web.HTTPFound(CONFIG.aai['url_redirect'])
+    response = web.HTTPSeeOther(CONFIG.aai['url_redirect'])
 
     # Save the received access token to cookies for later use
     response = await save_to_cookies(response,

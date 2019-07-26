@@ -1,32 +1,51 @@
 import unittest
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
-from aiohttp import web
-from oidc_client.app import init, main
+import asynctest
+
 from unittest import mock
+from aiohttp import web
+from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
+
+from oidc_client.app import init, main
 
 
 class AppTestCase(AioHTTPTestCase):
-    """Test for Web app.
-
-    Testing web app endpoints.
-    """
+    """Test endpoints."""
 
     async def get_application(self):
-        """Retrieve web Application for test."""
-        return init()
+        """Retrieve web application for test."""
+        return await init()
 
     @unittest_run_loop
     async def test_index(self):
-        """Simplest test the root endpoint."""
+        """Test root endpoint."""
         resp = await self.client.request("GET", "/")
         assert 200 == resp.status
+        assert 'oidc-client' == await resp.text()
+
+    @asynctest.mock.patch('oidc_client.app.login_request', side_effect={})
+    @unittest_run_loop
+    async def test_login(self, mock_login):
+        """Test login endpoint."""
+        await self.client.request("GET", "/login")
+        mock_login.assert_called()
+
+    @asynctest.mock.patch('oidc_client.app.logout_request', side_effect={})
+    @unittest_run_loop
+    async def test_logout(self, mock_logout):
+        """Test logout endpoint."""
+        await self.client.request("GET", "/logout")
+        mock_logout.assert_called()
+
+    @asynctest.mock.patch('oidc_client.app.callback_request', side_effect={})
+    @unittest_run_loop
+    async def test_callback(self, mock_callback):
+        """Test callback endpoint."""
+        await self.client.request("GET", "/callback")
+        mock_callback.assert_called()
 
 
 class TestBasicFunctionsApp(unittest.TestCase):
-    """Test App Base.
-
-    Testing basic functions from web app.
-    """
+    """Test web app."""
 
     def setUp(self):
         """Initialise fixtures."""
@@ -37,14 +56,14 @@ class TestBasicFunctionsApp(unittest.TestCase):
         pass
 
     @mock.patch('oidc_client.app.web')
-    def test_main(self, mock_webapp):
+    def test_main(self, mock_web):
         """Should start the webapp."""
         main()
-        mock_webapp.run_app.assert_called()
+        mock_web.run_app.assert_called()
 
-    def test_init(self):
+    async def test_init(self):
         """Test init type."""
-        server = init()
+        server = await init()
         self.assertIs(type(server), web.Application)
 
 
