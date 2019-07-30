@@ -1,10 +1,14 @@
+import sys
+
 import asynctest
 
 from collections import namedtuple
-from unittest.mock import MagicMock
+from ssl import SSLContext
+from unittest.mock import MagicMock, Mock, patch
 
 from aiohttp import web
 from aioresponses import aioresponses
+from testfixtures import TempDirectory
 
 from multidict import MultiDict
 
@@ -45,11 +49,19 @@ class MockResponse:
 class TestUtils(asynctest.TestCase):
     """Test supporting utility functions."""
 
+    # @patch('os.path.isfile')  # add m_os to params
     def test_ssl_context(self):
         """Test ssl context."""
-        # ssl_context() function is not yet implemented,
-        # added scaffolding here for future test
-        assert ssl_context() is None
+        # Could not figure out how to mock load_cert_chain(), figure it out later
+        # Test for ssl context loaded
+        # with TempDirectory() as d:
+        #     d.write('cert.pem', b'certfile')
+        #     d.write('key.pem', b'keyfile')
+        #     m_os.return_value = True
+        #     self.assertTrue(isinstance(ssl_context('cert.pem', 'key.pem'), SSLContext))
+        #     d.cleanup()
+        # Test for ssl context not loaded, files are missing
+        assert ssl_context('/missing/cert.pem', '/missing/key.pem') is None
 
     async def test_generate_state(self):
         """Test state generation."""

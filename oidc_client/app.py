@@ -61,7 +61,7 @@ def main():
                 host=CONFIG.app['host'],
                 port=CONFIG.app['port'],
                 shutdown_timeout=0,
-                ssl_context=ssl_context())
+                ssl_context=ssl_context(CONFIG.app['ssl_certfile'], CONFIG.app['ssl_keyfile']))
 
 
 if __name__ == '__main__':

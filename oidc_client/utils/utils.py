@@ -1,5 +1,8 @@
 """General Utility Functions."""
 
+import os
+import ssl
+
 from uuid import uuid4
 
 import aiohttp
@@ -10,8 +13,21 @@ from ..config import CONFIG
 from .logging import LOG
 
 
-def ssl_context():
+def ssl_context(cert, key):
     """Handle application security."""
+    LOG.debug('Load SSL context.')
+
+    context = None
+    if os.path.isfile(cert) and os.path.isfile(key):
+        LOG.debug('Found SSL cert and key, serve app as HTTPS.')
+        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context.load_cert_chain(cert, key)
+
+    # Debug log for start-up
+    if context is None:
+        LOG.debug(f'Certfile: {os.path.isfile(cert)}. Keyfile: {os.path.isfile(key)}.')
+        LOG.debug('Empty SSL context, serve app as HTTP.')
+
     return None
 
 
@@ -97,7 +113,13 @@ async def query_params(request):
 
 
 async def check_bona_fide(token):
-    """Check if user is recognised as a Bona Fide researcher."""
+    """Check if user is recognised as a Bona Fide researcher.
+
+    Bona Fide status is based on GA4GH RI claims specified in
+    https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/RI_Claims_V1.md
+
+    The exact requirements are described in
+    https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/RI_Claims_V1.md#registered-access"""
     LOG.debug('Checking Bona Fide status.')
 
     terms = False
