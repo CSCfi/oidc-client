@@ -1,14 +1,12 @@
-import sys
-
 import asynctest
 
 from collections import namedtuple
-from ssl import SSLContext
-from unittest.mock import MagicMock, Mock, patch
+# from ssl import SSLContext
+from unittest.mock import MagicMock  # , patch
 
 from aiohttp import web
 from aioresponses import aioresponses
-from testfixtures import TempDirectory
+# from testfixtures import TempDirectory
 
 from multidict import MultiDict
 

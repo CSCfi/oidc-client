@@ -119,7 +119,8 @@ async def check_bona_fide(token):
     https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/RI_Claims_V1.md
 
     The exact requirements are described in
-    https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/RI_Claims_V1.md#registered-access"""
+    https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/RI_Claims_V1.md#registered-access
+    """
     LOG.debug('Checking Bona Fide status.')
 
     terms = False
