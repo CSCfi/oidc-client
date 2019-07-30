@@ -31,7 +31,7 @@ Upon returning to the OIDC Client from the AAI server, OIDC Client extracts ``st
 and uses these values to request a token from the AAI server. Upon a successful retrieval of an access token, the access token
 is saved to the browser cookies.
 
-Other cookies created cookies include unsafe cookies for the purpose of displaying values in UI for logged in state and bona fide status.
+Some of the created cookies can be considered _unsafe_ (not `http_only`) for the purpose of displaying values in UI for logged in state and bona fide status.
 
 Cookies
 ~~~~~~~
