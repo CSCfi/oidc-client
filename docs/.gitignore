@@ -2,4 +2,3 @@
 # Sphinx documentation
 # =====================================
 _build/
-static/*.key
