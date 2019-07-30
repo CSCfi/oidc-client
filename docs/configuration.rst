@@ -62,7 +62,7 @@ Environment Variables
 The values in the configuration file can be overwritten with environment variables using the exact same name
 in all capital letters. For example:
 
-To overwrite the web application port from 8080 to 3000, one set the following environment variable:
+To overwrite the web application port from ``8080`` to ``3000``, one set the following environment variable:
 
 .. code-block:: console
 
