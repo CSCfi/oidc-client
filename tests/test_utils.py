@@ -39,10 +39,6 @@ class MockResponse:
             }
         )
 
-    def cookies(self):
-        """Return cookies."""
-        return self.cookies
-
 
 class TestUtils(asynctest.TestCase):
     """Test supporting utility functions."""
