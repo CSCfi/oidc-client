@@ -43,17 +43,26 @@ class MockResponse:
 class TestUtils(asynctest.TestCase):
     """Test supporting utility functions."""
 
-    # @patch('os.path.isfile')  # add m_os to params
+    # @patch('os.path.isfile')
+    # @patch('ssl.SSLContext')
+    # def test_ssl_context(self, m_ssl, m_os):
     def test_ssl_context(self):
         """Test ssl context."""
-        # Could not figure out how to mock load_cert_chain(), figure it out later
         # Test for ssl context loaded
+        #
         # with TempDirectory() as d:
-        #     d.write('cert.pem', b'certfile')
-        #     d.write('key.pem', b'keyfile')
-        #     m_os.return_value = True
-        #     self.assertTrue(isinstance(ssl_context('cert.pem', 'key.pem'), SSLContext))
+        #     d.makedir('testdir')
+        #     d.write('testdir/cert.pem', 'certfile'.encode('utf-8'))
+        #     d.write('testdir/key.pem', 'keyfile'.encode('utf-8'))
+        #     self.assertEqual(ssl_context('testdir/cert.pem', 'testdir/key.pem'), SSLContext)  # just to see what happens
+        #     self.assertTrue(isinstance(ssl_context('testdir/cert.pem', 'testdir/key.pem'), SSLContext))  # actual assert
         #     d.cleanup()
+        #
+        # m_os.return_value = True
+        # m_ssl.load_cert_chain = {}  # ?
+        # self.assertEqual(ssl_context('cert.pem', 'key.pem'), SSLContext)  # just to see what happens
+        # self.assertTrue(isinstance(ssl_context('cert.pem', 'key.pem'), SSLContext))  # actual assert
+        #
         # Test for ssl context not loaded, files are missing
         assert ssl_context('/missing/cert.pem', '/missing/key.pem') is None
 
