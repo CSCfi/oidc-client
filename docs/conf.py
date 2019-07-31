@@ -28,7 +28,7 @@ class Mock(MagicMock):
 MOCK_MODULES = ['aiohttp']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
-# If your documentation needs a elixir_oauth2 Sphinx version, state it here.
+# If your documentation needs a oidc_client Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
 
@@ -59,7 +59,7 @@ master_doc = 'index'
 current_year = str(datetime.date.today().year)
 
 # General information about the project.
-project = 'elixir_oauth2'
+project = 'oidc_client'
 copyright = f'{current_year}, {oidc_client.__copyright__} |'
 author = oidc_client.__author__
 
