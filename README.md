@@ -37,4 +37,4 @@ Navigate to `localhost:8080/login` to authenticate at the configured AAI server.
 
 ### Documentation
 
-For more installation and production deployment instructions and examples see the [documentation](https://csc-oidc-client.readthedocs.io/en/latest/).
+For more installation and production deployment instructions and examples see the [documentation](https://csc-oidc-client.readthedocs.io/en/latest/?badge=latest).
