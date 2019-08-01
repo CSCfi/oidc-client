@@ -1,12 +1,10 @@
 import asynctest
 
 from collections import namedtuple
-# from ssl import SSLContext
-from unittest.mock import MagicMock  # , patch
+from unittest.mock import MagicMock, patch
 
 from aiohttp import web
 from aioresponses import aioresponses
-# from testfixtures import TempDirectory
 
 from multidict import MultiDict
 
@@ -40,29 +38,31 @@ class MockResponse:
         )
 
 
+class MockSSL:
+    """Mocked SSLContext."""
+
+    def __init__(self):
+        """Initialise object."""
+        self.cert = ''
+        self.key = ''
+
+    def load_cert_chain(self, cert, key):
+        """Read certificate and key files."""
+        self.cert = cert
+        self.key = key
+
+
 class TestUtils(asynctest.TestCase):
     """Test supporting utility functions."""
 
-    # @patch('os.path.isfile')
-    # @patch('ssl.SSLContext')
-    # def test_ssl_context(self, m_ssl, m_os):
-    def test_ssl_context(self):
+    @patch('os.path.isfile')
+    @patch('oidc_client.utils.utils.ssl.create_default_context')
+    def test_ssl_context(self, m_ssl, m_os):
         """Test ssl context."""
-        # Test for ssl context loaded
-        #
-        # with TempDirectory() as d:
-        #     d.makedir('testdir')
-        #     d.write('testdir/cert.pem', 'certfile'.encode('utf-8'))
-        #     d.write('testdir/key.pem', 'keyfile'.encode('utf-8'))
-        #     self.assertEqual(ssl_context('testdir/cert.pem', 'testdir/key.pem'), SSLContext)  # just to see what happens
-        #     self.assertTrue(isinstance(ssl_context('testdir/cert.pem', 'testdir/key.pem'), SSLContext))  # actual assert
-        #     d.cleanup()
-        #
-        # m_os.return_value = True
-        # m_ssl.load_cert_chain = {}  # ?
-        # self.assertEqual(ssl_context('cert.pem', 'key.pem'), SSLContext)  # just to see what happens
-        # self.assertTrue(isinstance(ssl_context('cert.pem', 'key.pem'), SSLContext))  # actual assert
-        #
+        # Test for files are found, and mock loading of files
+        m_os.return_value = True
+        m_ssl.return_value = MockSSL()
+
         # Test for ssl context not loaded, files are missing
         assert ssl_context('/missing/cert.pem', '/missing/key.pem') is None
 
