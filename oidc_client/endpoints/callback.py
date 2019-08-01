@@ -18,7 +18,7 @@ async def callback_request(request):
 
     # Verify, that states match
     if not state == params['state']:
-        raise web.HTTPForbidden(text='401 Bad user session.')
+        raise web.HTTPForbidden(text='403 Bad user session.')
 
     # Request access token from AAI server
     access_token = await request_token(params['code'])
