@@ -5,11 +5,12 @@ from unittest.mock import MagicMock, patch
 
 from aiohttp import web
 from aioresponses import aioresponses
+from authlib.jose import jwt
 
 from multidict import MultiDict
 
 from oidc_client.utils.utils import ssl_context, generate_state, get_from_cookies, save_to_cookies
-from oidc_client.utils.utils import request_token, query_params, check_bona_fide
+from oidc_client.utils.utils import request_token, query_params, check_bona_fide, get_jwk, validate_token
 
 
 def mock_request_with_cookies(cookies):
@@ -50,6 +51,35 @@ class MockSSL:
         """Read certificate and key files."""
         self.cert = cert
         self.key = key
+
+
+def mock_token(iss=None, aud=None, iat=None, exp=None):
+    """Mock ELIXIR AAI token."""
+    pem = {
+        "kty": "oct",
+        "kid": "018c0ae5-4d9b-471b-bfd6-eef314bc7037",
+        "use": "sig",
+        "alg": "HS256",
+        "k": "hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg"
+    }
+    header = {
+        "jku": "https://login.elixir-czech.org/oidc/jwk",
+        "kid": "018c0ae5-4d9b-471b-bfd6-eef314bc7037",
+        "alg": "HS256"
+    }
+    payload = {
+        "sub": "smth@elixir-europe.org"
+    }
+    if iss is not None:
+        payload["iss"] = iss
+    if aud is not None:
+        payload["aud"] = aud
+    if iat is not None:
+        payload["iat"] = iat
+    if exp is not None:
+        payload["exp"] = exp
+    token = jwt.encode(header, payload, pem).decode('utf-8')
+    return token, pem
 
 
 class TestUtils(asynctest.TestCase):
@@ -107,15 +137,15 @@ class TestUtils(asynctest.TestCase):
     async def test_request_token(self, m):
         """Test token request."""
         # Test token received
-        m.post('https://aai.org/token', status=200, payload={'access_token': 'secret'})
+        m.post('https://login.elixir-czech.org/oidc/token', status=200, payload={'access_token': 'secret'})
         token = await request_token("123")
         assert token == 'secret'
         # Test request OK, but token not received
-        m.post('https://aai.org/token', status=200, payload={})
+        m.post('https://login.elixir-czech.org/oidc/token', status=200, payload={})
         with self.assertRaises(web.HTTPBadRequest):
             await request_token("123")
         # Test failed request
-        m.post('https://aai.org/token', status=400)
+        m.post('https://login.elixir-czech.org/oidc/token', status=400)
         with self.assertRaises(web.HTTPBadRequest):
             await request_token("123")
 
@@ -153,17 +183,75 @@ class TestUtils(asynctest.TestCase):
                 ]
             }
         }
-        m.get('https://aai.org/userinfo', status=200, payload=payload)
+        m.get('https://login.elixir-czech.org/oidc/userinfo', status=200, payload=payload)
         bona_fide_status = await check_bona_fide("token")
         assert bona_fide_status is True
         # Bona fide not OK
-        m.get('https://aai.org/userinfo', status=200, payload={})
+        m.get('https://login.elixir-czech.org/oidc/userinfo', status=200, payload={})
         bona_fide_status = await check_bona_fide("token")
         assert bona_fide_status is False
         # Test failed request
-        m.get('https://aai.org/userinfo', status=400)
+        m.get('https://login.elixir-czech.org/oidc/userinfo', status=400)
         with self.assertRaises(web.HTTPBadRequest):
             await check_bona_fide("token")
+
+    @aioresponses()
+    async def test_get_jwk(self, m):
+        """Test getting JWK."""
+        # Test getting key from server
+        m.get('https://login.elixir-czech.org/oidc/jwk', status=200, payload={'hello': 'there'})
+        key = await get_jwk()
+        self.assertEqual({'hello': 'there'}, key)
+        # Test getting key from config
+        #
+        # Find a way to place a key into CONFIG
+        # CONFIG is created on startup, os.env is loaded on CONFIG creation, not in functions
+        # Failed attempts: mock.patch CONFIG.aai['jwk'].return_value, EnvironmentVarGuard
+        #
+        # key = await get_jwk()
+        # self.assertEqual('placeholder', key)
+
+    @asynctest.mock.patch('oidc_client.utils.utils.get_jwk')
+    async def test_validate_token(self, m_jwk):
+        """Test token validation."""
+        # Test token passes (raises no exceptions)
+        token, pem = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                                aud='audience1',
+                                iat=1111111111,
+                                exp=9999999999)
+        m_jwk.return_value = pem
+        self.assertEqual(await validate_token(token), None)
+        # Test for a missing claim
+        token, pem = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                                aud='audience1',
+                                exp=9999999999)
+        m_jwk.return_value = pem
+        with self.assertRaises(web.HTTPUnauthorized):
+            await validate_token(token)
+        # Test for expired token
+        token, pem = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                                aud='audience1',
+                                iat=1111111111,
+                                exp=1111111111)
+        m_jwk.return_value = pem
+        with self.assertRaises(web.HTTPUnauthorized):
+            await validate_token(token)
+        # Test for invalid claim value
+        token, pem = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                                aud='wrong_audience',
+                                iat=1111111111,
+                                exp=9999999999)
+        m_jwk.return_value = pem
+        with self.assertRaises(web.HTTPForbidden):
+            await validate_token(token)
+        # Test for bad key/signature
+        token, _ = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                              aud='audience1',
+                              iat=1111111111,
+                              exp=9999999999)
+        m_jwk.return_value = 'another key'
+        with self.assertRaises(web.HTTPForbidden):
+            await validate_token(token)
 
 
 if __name__ == '__main__':

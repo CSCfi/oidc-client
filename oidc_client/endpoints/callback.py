@@ -2,7 +2,7 @@
 
 from aiohttp import web
 
-from ..utils.utils import get_from_cookies, save_to_cookies, request_token, query_params, check_bona_fide
+from ..utils.utils import get_from_cookies, save_to_cookies, request_token, query_params, check_bona_fide, validate_token
 from ..config import CONFIG
 from ..utils.logging import LOG
 
@@ -22,6 +22,9 @@ async def callback_request(request):
 
     # Request access token from AAI server
     access_token = await request_token(params['code'])
+
+    # Validate access token
+    await validate_token(access_token)
 
     # Prepare response
     response = web.HTTPSeeOther(CONFIG.aai['url_redirect'])
