@@ -1,3 +1,5 @@
+import re
+
 import asynctest
 
 from collections import namedtuple
@@ -11,6 +13,9 @@ from multidict import MultiDict
 
 from oidc_client.utils.utils import ssl_context, generate_state, get_from_cookies, save_to_cookies
 from oidc_client.utils.utils import request_token, query_params, check_bona_fide, get_jwk, validate_token
+
+# Mock URLs in functions to replace the real request, checks for http/https/localhost in the beginning
+MOCK_URL = re.compile(r'^(http|localhost)')
 
 
 def mock_request_with_cookies(cookies):
@@ -137,15 +142,15 @@ class TestUtils(asynctest.TestCase):
     async def test_request_token(self, m):
         """Test token request."""
         # Test token received
-        m.post('https://login.elixir-czech.org/oidc/token', status=200, payload={'access_token': 'secret'})
+        m.post(MOCK_URL, status=200, payload={'access_token': 'secret'})
         token = await request_token("123")
         assert token == 'secret'
         # Test request OK, but token not received
-        m.post('https://login.elixir-czech.org/oidc/token', status=200, payload={})
+        m.post(MOCK_URL, status=200, payload={})
         with self.assertRaises(web.HTTPBadRequest):
             await request_token("123")
         # Test failed request
-        m.post('https://login.elixir-czech.org/oidc/token', status=400)
+        m.post(MOCK_URL, status=400)
         with self.assertRaises(web.HTTPBadRequest):
             await request_token("123")
 
@@ -183,15 +188,15 @@ class TestUtils(asynctest.TestCase):
                 ]
             }
         }
-        m.get('https://login.elixir-czech.org/oidc/userinfo', status=200, payload=payload)
+        m.get(MOCK_URL, status=200, payload=payload)
         bona_fide_status = await check_bona_fide("token")
         assert bona_fide_status is True
         # Bona fide not OK
-        m.get('https://login.elixir-czech.org/oidc/userinfo', status=200, payload={})
+        m.get(MOCK_URL, status=200, payload={})
         bona_fide_status = await check_bona_fide("token")
         assert bona_fide_status is False
         # Test failed request
-        m.get('https://login.elixir-czech.org/oidc/userinfo', status=400)
+        m.get(MOCK_URL, status=400)
         with self.assertRaises(web.HTTPBadRequest):
             await check_bona_fide("token")
 
@@ -199,7 +204,7 @@ class TestUtils(asynctest.TestCase):
     async def test_get_jwk(self, m):
         """Test getting JWK."""
         # Test getting key from server
-        m.get('https://login.elixir-czech.org/oidc/jwk', status=200, payload={'hello': 'there'})
+        m.get(MOCK_URL, status=200, payload={'hello': 'there'})
         key = await get_jwk()
         self.assertEqual({'hello': 'there'}, key)
         # Test getting key from config
