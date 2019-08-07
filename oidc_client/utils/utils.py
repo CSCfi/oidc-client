@@ -8,6 +8,10 @@ from uuid import uuid4
 import aiohttp
 
 from aiohttp import web
+from aiocache import cached
+from aiocache.serializers import JsonSerializer
+from authlib.jose import jwt
+from authlib.jose.errors import MissingClaimError, InvalidClaimError, ExpiredTokenError, BadSignatureError
 
 from ..config import CONFIG
 from .logging import LOG
@@ -154,3 +158,62 @@ async def check_bona_fide(token):
                 LOG.error(f'Userinfo request to AAI failed: {response}.')
                 LOG.error(await response.json())
                 raise web.HTTPBadRequest(text=f'Token request to AAI failed: {response.status}.')
+
+
+@cached(ttl=3600, key="jwk", serializer=JsonSerializer())
+async def get_jwk():
+    """Get a key to decode access token with."""
+    LOG.debug('Retrieving JWK.')
+
+    # JWK can be fetched from environment instead of a server
+    key = os.environ.get('JWK', None)
+    if key is not None:
+        return key
+
+    # In other case, retrieve JWK from server
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(CONFIG.aai['jwk_server']) as r:
+                # This can be a single key or a list of JWK
+                return await r.json()
+    except Exception as e:
+        LOG.error(f'Could not retrieve JWK: {e}')
+        raise web.HTTPInternalServerError(text="Could not retrieve public key.")
+
+
+async def validate_token(token):
+    """Validate JWT."""
+    LOG.debug('Validating access token.')
+
+    # Get JWK to decode the token with
+    jwk = await get_jwk()
+
+    # Claims that must exist in the token, and required values if specified
+    claims_options = {
+        "iss": {
+            "essential": True,
+            "values": CONFIG.aai['iss'].split(',')  # Token allowed from these issuers
+        },
+        "aud": {
+            "essential": True,
+            "values": CONFIG.aai['aud'].split(',')  # Token allowed for these audiences
+        },
+        "iat": {
+            "essential": True
+        },
+        "exp": {
+            "essential": True
+        }
+    }
+    try:
+        # Decode the token and validate the contents
+        decodedData = jwt.decode(token, jwk, claims_options=claims_options)
+        decodedData.validate()
+    except MissingClaimError as e:
+        raise web.HTTPUnauthorized(text=f'Could not validate access token: Missing claim(s): {e}')
+    except ExpiredTokenError as e:
+        raise web.HTTPUnauthorized(text=f'Could not validate access token: Expired signature: {e}')
+    except InvalidClaimError as e:
+        raise web.HTTPForbidden(text=f'Could not validate access token: Token info not corresponding with claim: {e}')
+    except BadSignatureError as e:
+        raise web.HTTPForbidden(text=f'Could not validate access token: Token signature could not be verified: {e}')

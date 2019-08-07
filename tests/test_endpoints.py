@@ -76,9 +76,10 @@ class TestEndpoints(asynctest.TestCase):
         with self.assertRaises(web.HTTPNotImplemented):
             await logout_request({})
 
+    @asynctest.mock.patch('oidc_client.endpoints.callback.validate_token')
     @asynctest.mock.patch('oidc_client.endpoints.callback.check_bona_fide')
     @asynctest.mock.patch('oidc_client.endpoints.callback.request_token')
-    async def test_callback_endpoint(self, m_token, m_bona):
+    async def test_callback_endpoint(self, m_token, m_bona, m_valid):
         """Test callback endpoint processor."""
         # Test bad request: request doesn't pass state validation
         bad_request = MockRequest(
@@ -92,6 +93,7 @@ class TestEndpoints(asynctest.TestCase):
             cookies={'oidc_state': 5000},
             query={'state': 5000, 'code': 'fluffy bunnies'}
         )
+        m_valid.return_value = True
         m_token.return_value = 'super.secret.token'
         m_bona.return_value = True
         with self.assertRaises(web.HTTPSeeOther):

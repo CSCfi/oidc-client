@@ -34,7 +34,11 @@ def parse_config_file(path):
             'url_userinfo': os.environ.get('URL_USERINFO', config.get('aai', 'url_userinfo')) or None,
             'url_callback': os.environ.get('URL_CALLBACK', config.get('aai', 'url_callback')) or None,
             'url_redirect': os.environ.get('URL_REDIRECT', config.get('aai', 'url_redirect')) or None,
-            'scope': os.environ.get('SCOPE', config.get('aai', 'scope')) or 'openid'
+            'scope': os.environ.get('SCOPE', config.get('aai', 'scope')) or 'openid',
+            'iss': os.environ.get('ISS', config.get('aai', 'iss')) or None,
+            'aud': os.environ.get('AUD', config.get('aai', 'aud')) or None,
+            'jwk': os.environ.get('JWK', config.get('aai', 'jwk')) or None,
+            'jwk_server': os.environ.get('JWK_SERVER', config.get('aai', 'jwk_server')) or None
         },
         'elixir': {
             'bona_fide_value': os.environ.get('BONA_FIDE_VALUE', config.get('elixir', 'bona_fide_value')) or ''

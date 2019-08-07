@@ -11,7 +11,7 @@ Default values can be seen in the configuration file parser, they are the right-
 
 .. literalinclude:: /../oidc_client/config/__init__.py
    :language: python
-   :lines: 15-41
+   :lines: 15-45
 
 The default values can be overwritten and saved to file in the ``config.ini`` configuration file.
 The configuration file has three basic sections: ``app`` for application configuration, ``cookie`` for cookie
@@ -43,7 +43,7 @@ AAI Server Configuration
 
 .. literalinclude:: /../oidc_client/config/config.ini
    :language: python
-   :lines: 56-82
+   :lines: 56-94
 
 .. _elixir-conf:
 
@@ -52,7 +52,7 @@ ELIXIR Configuration
 
 .. literalinclude:: /../oidc_client/config/config.ini
    :language: python
-   :lines: 84-89
+   :lines: 96-101
 
 .. _env:
 
