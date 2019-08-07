@@ -1,17 +1,21 @@
+import re
+
 import asynctest
 
 from collections import namedtuple
-# from ssl import SSLContext
-from unittest.mock import MagicMock  # , patch
+from unittest.mock import MagicMock, patch
 
 from aiohttp import web
 from aioresponses import aioresponses
-# from testfixtures import TempDirectory
+from authlib.jose import jwt
 
 from multidict import MultiDict
 
 from oidc_client.utils.utils import ssl_context, generate_state, get_from_cookies, save_to_cookies
-from oidc_client.utils.utils import request_token, query_params, check_bona_fide
+from oidc_client.utils.utils import request_token, query_params, check_bona_fide, get_jwk, validate_token
+
+# Mock URLs in functions to replace the real request, checks for http/https/localhost in the beginning
+MOCK_URL = re.compile(r'^(http|localhost)')
 
 
 def mock_request_with_cookies(cookies):
@@ -40,29 +44,60 @@ class MockResponse:
         )
 
 
+class MockSSL:
+    """Mocked SSLContext."""
+
+    def __init__(self):
+        """Initialise object."""
+        self.cert = ''
+        self.key = ''
+
+    def load_cert_chain(self, cert, key):
+        """Read certificate and key files."""
+        self.cert = cert
+        self.key = key
+
+
+def mock_token(iss=None, aud=None, iat=None, exp=None):
+    """Mock ELIXIR AAI token."""
+    pem = {
+        "kty": "oct",
+        "kid": "018c0ae5-4d9b-471b-bfd6-eef314bc7037",
+        "use": "sig",
+        "alg": "HS256",
+        "k": "hJtXIZ2uSN5kbQfbtTNWbpdmhkV8FJG-Onbc6mxCcYg"
+    }
+    header = {
+        "jku": "https://login.elixir-czech.org/oidc/jwk",
+        "kid": "018c0ae5-4d9b-471b-bfd6-eef314bc7037",
+        "alg": "HS256"
+    }
+    payload = {
+        "sub": "smth@elixir-europe.org"
+    }
+    if iss is not None:
+        payload["iss"] = iss
+    if aud is not None:
+        payload["aud"] = aud
+    if iat is not None:
+        payload["iat"] = iat
+    if exp is not None:
+        payload["exp"] = exp
+    token = jwt.encode(header, payload, pem).decode('utf-8')
+    return token, pem
+
+
 class TestUtils(asynctest.TestCase):
     """Test supporting utility functions."""
 
-    # @patch('os.path.isfile')
-    # @patch('ssl.SSLContext')
-    # def test_ssl_context(self, m_ssl, m_os):
-    def test_ssl_context(self):
+    @patch('os.path.isfile')
+    @patch('oidc_client.utils.utils.ssl.create_default_context')
+    def test_ssl_context(self, m_ssl, m_os):
         """Test ssl context."""
-        # Test for ssl context loaded
-        #
-        # with TempDirectory() as d:
-        #     d.makedir('testdir')
-        #     d.write('testdir/cert.pem', 'certfile'.encode('utf-8'))
-        #     d.write('testdir/key.pem', 'keyfile'.encode('utf-8'))
-        #     self.assertEqual(ssl_context('testdir/cert.pem', 'testdir/key.pem'), SSLContext)  # just to see what happens
-        #     self.assertTrue(isinstance(ssl_context('testdir/cert.pem', 'testdir/key.pem'), SSLContext))  # actual assert
-        #     d.cleanup()
-        #
-        # m_os.return_value = True
-        # m_ssl.load_cert_chain = {}  # ?
-        # self.assertEqual(ssl_context('cert.pem', 'key.pem'), SSLContext)  # just to see what happens
-        # self.assertTrue(isinstance(ssl_context('cert.pem', 'key.pem'), SSLContext))  # actual assert
-        #
+        # Test for files are found, and mock loading of files
+        m_os.return_value = True
+        m_ssl.return_value = MockSSL()
+
         # Test for ssl context not loaded, files are missing
         assert ssl_context('/missing/cert.pem', '/missing/key.pem') is None
 
@@ -107,15 +142,15 @@ class TestUtils(asynctest.TestCase):
     async def test_request_token(self, m):
         """Test token request."""
         # Test token received
-        m.post('https://aai.org/token', status=200, payload={'access_token': 'secret'})
+        m.post(MOCK_URL, status=200, payload={'access_token': 'secret'})
         token = await request_token("123")
         assert token == 'secret'
         # Test request OK, but token not received
-        m.post('https://aai.org/token', status=200, payload={})
+        m.post(MOCK_URL, status=200, payload={})
         with self.assertRaises(web.HTTPBadRequest):
             await request_token("123")
         # Test failed request
-        m.post('https://aai.org/token', status=400)
+        m.post(MOCK_URL, status=400)
         with self.assertRaises(web.HTTPBadRequest):
             await request_token("123")
 
@@ -153,17 +188,75 @@ class TestUtils(asynctest.TestCase):
                 ]
             }
         }
-        m.get('https://aai.org/userinfo', status=200, payload=payload)
+        m.get(MOCK_URL, status=200, payload=payload)
         bona_fide_status = await check_bona_fide("token")
         assert bona_fide_status is True
         # Bona fide not OK
-        m.get('https://aai.org/userinfo', status=200, payload={})
+        m.get(MOCK_URL, status=200, payload={})
         bona_fide_status = await check_bona_fide("token")
         assert bona_fide_status is False
         # Test failed request
-        m.get('https://aai.org/userinfo', status=400)
+        m.get(MOCK_URL, status=400)
         with self.assertRaises(web.HTTPBadRequest):
             await check_bona_fide("token")
+
+    @aioresponses()
+    async def test_get_jwk(self, m):
+        """Test getting JWK."""
+        # Test getting key from server
+        m.get(MOCK_URL, status=200, payload={'hello': 'there'})
+        key = await get_jwk()
+        self.assertEqual({'hello': 'there'}, key)
+        # Test getting key from config
+        #
+        # Find a way to place a key into CONFIG
+        # CONFIG is created on startup, os.env is loaded on CONFIG creation, not in functions
+        # Failed attempts: mock.patch CONFIG.aai['jwk'].return_value, EnvironmentVarGuard
+        #
+        # key = await get_jwk()
+        # self.assertEqual('placeholder', key)
+
+    @asynctest.mock.patch('oidc_client.utils.utils.get_jwk')
+    async def test_validate_token(self, m_jwk):
+        """Test token validation."""
+        # Test token passes (raises no exceptions)
+        token, pem = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                                aud='audience1',
+                                iat=1111111111,
+                                exp=9999999999)
+        m_jwk.return_value = pem
+        self.assertEqual(await validate_token(token), None)
+        # Test for a missing claim
+        token, pem = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                                aud='audience1',
+                                exp=9999999999)
+        m_jwk.return_value = pem
+        with self.assertRaises(web.HTTPUnauthorized):
+            await validate_token(token)
+        # Test for expired token
+        token, pem = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                                aud='audience1',
+                                iat=1111111111,
+                                exp=1111111111)
+        m_jwk.return_value = pem
+        with self.assertRaises(web.HTTPUnauthorized):
+            await validate_token(token)
+        # Test for invalid claim value
+        token, pem = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                                aud='wrong_audience',
+                                iat=1111111111,
+                                exp=9999999999)
+        m_jwk.return_value = pem
+        with self.assertRaises(web.HTTPForbidden):
+            await validate_token(token)
+        # Test for bad key/signature
+        token, _ = mock_token(iss='https://login.elixir-czech.org/oidc/',
+                              aud='audience1',
+                              iat=1111111111,
+                              exp=9999999999)
+        m_jwk.return_value = 'another key'
+        with self.assertRaises(web.HTTPForbidden):
+            await validate_token(token)
 
 
 if __name__ == '__main__':
