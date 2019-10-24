@@ -2,6 +2,7 @@
 
 import os
 import ssl
+import urllib.parse
 
 from uuid import uuid4
 
@@ -217,3 +218,24 @@ async def validate_token(token):
         raise web.HTTPForbidden(text=f'Could not validate access token: Token info not corresponding with claim: {e}')
     except BadSignatureError as e:
         raise web.HTTPForbidden(text=f'Could not validate access token: Token signature could not be verified: {e}')
+
+
+async def revoke_token(token):
+    """Request token revocation at AAI."""
+    LOG.debug('Revoking token.')
+
+    auth = aiohttp.BasicAuth(login=CONFIG.aai['client_id'], password=CONFIG.aai['client_secret'])
+    params = {
+        'token': token
+    }
+
+    # Set up client authentication for request
+    async with aiohttp.ClientSession(auth=auth) as session:
+        # Send request to AAI
+        async with session.get(f"{CONFIG.aai['url_revoke']}?{urllib.parse.urlencode(params)}") as response:
+            LOG.debug(f'AAI response status: {response.status}.')
+            # Validate response from AAI
+            if response.status != 200:
+                LOG.error(f'Logout failed at AAI: {response}.')
+                LOG.error(await response.json())
+                raise web.HTTPBadRequest(text=f'Logout failed at AAI: {response.status}.')

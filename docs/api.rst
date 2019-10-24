@@ -19,9 +19,8 @@ Upon a successful authentication at the AAI, the user is returned to the ``/call
 Logout
 ~~~~~~
 
-The logout endpoint ``/logout`` is used to destroy sessions cookies and invalidate the access token.
-
-.. note:: ELIXIR AAI has not implemented a logout feature yet, so this feature is also missing from OIDC Client.
+The logout endpoint ``/logout`` is used to destroy the access token cookie and to revoke the access token at the AAI.
+Upon a successful logout procedure, the user is returned to the ``url_redirect`` address from the configuration file.
 
 Callback
 ~~~~~~~~

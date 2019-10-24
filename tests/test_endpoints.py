@@ -69,11 +69,14 @@ class TestEndpoints(asynctest.TestCase):
         with self.assertRaises(web.HTTPSeeOther):
             await login_request(web.Request)
 
-    async def test_logout_endpoint(self):
+    @asynctest.mock.patch('oidc_client.endpoints.logout.revoke_token')
+    @asynctest.mock.patch('oidc_client.endpoints.logout.get_from_cookies')
+    async def test_logout_endpoint(self, m_cookies, m_rtoken):
         """Test logout endpoint processor."""
-        # logout endpoint is not yet implemented,
-        # added scaffolding here for future test
-        with self.assertRaises(web.HTTPNotImplemented):
+        m_cookies.return_value = 'token'
+        m_rtoken.return_value = True
+        # Test that logout redirects user
+        with self.assertRaises(web.HTTPSeeOther):
             await logout_request({})
 
     @asynctest.mock.patch('oidc_client.endpoints.callback.validate_token')
