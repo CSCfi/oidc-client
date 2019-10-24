@@ -24,7 +24,7 @@ def ssl_context(cert, key):
     context = None
     if os.path.isfile(cert) and os.path.isfile(key):
         LOG.debug('Found SSL cert and key, serve app as HTTPS.')
-        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context = ssl.create_default_context()
         context.load_cert_chain(cert, key)
 
     # Debug log for start-up
