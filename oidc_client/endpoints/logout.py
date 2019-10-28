@@ -12,10 +12,10 @@ async def logout_request(request):
     LOG.debug('Handle logout request.')
 
     # Read access token from cookies
-    access_token = get_from_cookies(request, 'access_token')
+    access_token = await get_from_cookies(request, 'access_token')
 
     # Revoke token at AAI
-    revoke_token(access_token)
+    await revoke_token(access_token)
 
     # Prepare response
     response = web.HTTPSeeOther(CONFIG.aai['url_redirect'])
