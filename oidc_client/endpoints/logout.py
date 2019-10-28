@@ -20,12 +20,22 @@ async def logout_request(request):
     # Prepare response
     response = web.HTTPSeeOther(CONFIG.aai['url_redirect'])
 
-    # Overwrite token cookie with an instantly expiring one
+    # Overwrite status cookies made by this API with instantly expiring ones
     response = await save_to_cookies(response,
                                      key='access_token',
                                      value='token_has_been_revoked',
                                      lifetime=0,
                                      http_only=CONFIG.cookie['http_only'])
+    response = await save_to_cookies(response,
+                                     key='logged_in',
+                                     value='False',
+                                     lifetime=0,
+                                     http_only=False)
+    response = await save_to_cookies(response,
+                                     key='bona_fide',
+                                     value='False',
+                                     lifetime=0,
+                                     http_only=False)
 
     # Redirect user to UI, this does a 303 redirect
     raise response
