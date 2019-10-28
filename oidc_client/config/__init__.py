@@ -34,6 +34,7 @@ def parse_config_file(path):
             'url_userinfo': os.environ.get('URL_USERINFO', config.get('aai', 'url_userinfo')) or None,
             'url_callback': os.environ.get('URL_CALLBACK', config.get('aai', 'url_callback')) or None,
             'url_redirect': os.environ.get('URL_REDIRECT', config.get('aai', 'url_redirect')) or None,
+            'url_revoke': os.environ.get('URL_REVOKE', config.get('aai', 'url_revoke')) or None,
             'scope': os.environ.get('SCOPE', config.get('aai', 'scope')) or 'openid',
             'iss': os.environ.get('ISS', config.get('aai', 'iss')) or None,
             'aud': os.environ.get('AUD', config.get('aai', 'aud')) or None,

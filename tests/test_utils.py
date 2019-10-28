@@ -13,6 +13,7 @@ from multidict import MultiDict
 
 from oidc_client.utils.utils import ssl_context, generate_state, get_from_cookies, save_to_cookies
 from oidc_client.utils.utils import request_token, query_params, check_bona_fide, get_jwk, validate_token
+from oidc_client.utils.utils import revoke_token
 
 # Mock URLs in functions to replace the real request, checks for http/https/localhost in the beginning
 MOCK_URL = re.compile(r'^(http|localhost)')
@@ -257,6 +258,17 @@ class TestUtils(asynctest.TestCase):
         m_jwk.return_value = 'another key'
         with self.assertRaises(web.HTTPForbidden):
             await validate_token(token)
+
+    @aioresponses()
+    async def test_revoke_token(self, m):
+        """Test token revocation."""
+        # Test successful revocation of token
+        m.get(MOCK_URL, status=200)
+        await revoke_token('token')
+        # Test failed revocation of token
+        m.get(MOCK_URL, status=400)
+        with self.assertRaises(web.HTTPBadRequest):
+            await revoke_token('what')
 
 
 if __name__ == '__main__':

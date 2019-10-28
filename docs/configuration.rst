@@ -43,7 +43,7 @@ AAI Server Configuration
 
 .. literalinclude:: /../oidc_client/config/config.ini
    :language: python
-   :lines: 56-94
+   :lines: 56-97
 
 .. _elixir-conf:
 
@@ -52,7 +52,7 @@ ELIXIR Configuration
 
 .. literalinclude:: /../oidc_client/config/config.ini
    :language: python
-   :lines: 96-101
+   :lines: 99-104
 
 .. _env:
 
