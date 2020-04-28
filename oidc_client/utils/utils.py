@@ -196,7 +196,7 @@ async def validate_token(token):
             "values": CONFIG.aai['iss'].split(',')  # Token allowed from these issuers
         },
         "aud": {
-            "essential": True,
+            "essential": False,
             "values": CONFIG.aai['aud'].split(',')  # Token allowed for these audiences
         },
         "iat": {
