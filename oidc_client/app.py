@@ -7,6 +7,7 @@ from aiohttp import web
 from .endpoints.login import login_request
 from .endpoints.logout import logout_request
 from .endpoints.callback import callback_request
+from .endpoints.token import token_request
 from .utils.utils import ssl_context
 from .utils.logging import LOG
 from .config import CONFIG
@@ -39,6 +40,13 @@ async def callback(request):
     """Receive callback from AAI server after authentication."""
     LOG.info('Received request to GET /callback.')
     await callback_request(request)
+
+
+@routes.get('/token')
+async def token(request):
+    """Display token from cookies, if it exists."""
+    LOG.info('Received request to GET /token.')
+    await token_request(request)
 
 
 async def init():
