@@ -46,7 +46,7 @@ async def callback(request):
 async def token(request):
     """Display token from cookies, if it exists."""
     LOG.info('Received request to GET /token.')
-    await token_request(request)
+    return web.json_response(await token_request(request))
 
 
 async def init():
