@@ -106,7 +106,7 @@ class TestUtils(asynctest.TestCase):
         """Test state generation."""
         state = await generate_state()
         assert type(state) == str
-        assert len(state) == 36
+        assert len(state) == 64
 
     async def test_get_from_cookies(self):
         """Test retrieving values from cookies by key."""

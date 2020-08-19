@@ -2,9 +2,8 @@
 
 import os
 import ssl
+import secrets
 import urllib.parse
-
-from uuid import uuid4
 
 import aiohttp
 
@@ -39,7 +38,7 @@ def ssl_context(cert, key):
 async def generate_state():
     """Generate a state for authentication request and return the value for use."""
     LOG.debug('Generate a new state for authentication request.')
-    return str(uuid4())
+    return secrets.token_hex()
 
 
 async def get_from_cookies(request, key):

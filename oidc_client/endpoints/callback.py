@@ -1,5 +1,7 @@
 """Callback Endpoint."""
 
+import secrets
+
 from aiohttp import web
 
 from ..utils.utils import get_from_cookies, save_to_cookies, request_token, query_params, check_bona_fide, validate_token
@@ -17,7 +19,7 @@ async def callback_request(request):
     params = await query_params(request)
 
     # Verify, that states match
-    if not state == params['state']:
+    if not secrets.compare_digest(str(state), str(params['state'])):
         raise web.HTTPForbidden(text='403 Bad user session.')
 
     # Request access token from AAI server
