@@ -1,7 +1,6 @@
 """General Utility Functions."""
 
 import os
-import ssl
 import secrets
 import urllib.parse
 
@@ -15,24 +14,6 @@ from authlib.jose.errors import MissingClaimError, InvalidClaimError, ExpiredTok
 
 from ..config import CONFIG
 from .logging import LOG
-
-
-def ssl_context(cert, key):
-    """Handle application security."""
-    LOG.debug('Load SSL context.')
-
-    context = None
-    if os.path.isfile(cert) and os.path.isfile(key):
-        LOG.debug('Found SSL cert and key, serve app as HTTPS.')
-        context = ssl.create_default_context()
-        context.load_cert_chain(cert, key)
-
-    # Debug log for start-up
-    if context is None:
-        LOG.debug(f'Certfile: {os.path.isfile(cert)}. Keyfile: {os.path.isfile(key)}.')
-        LOG.debug('Empty SSL context, serve app as HTTP.')
-
-    return None
 
 
 async def generate_state():

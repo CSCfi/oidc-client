@@ -7,7 +7,6 @@ from aiohttp import web
 from .endpoints.login import login_request
 from .endpoints.logout import logout_request
 from .endpoints.callback import callback_request
-from .utils.utils import ssl_context
 from .utils.logging import LOG
 from .config import CONFIG
 
@@ -60,8 +59,7 @@ def main():
     web.run_app(init(),
                 host=CONFIG.app['host'],
                 port=CONFIG.app['port'],
-                shutdown_timeout=0,
-                ssl_context=ssl_context(CONFIG.app['ssl_certfile'], CONFIG.app['ssl_keyfile']))
+                shutdown_timeout=0)
 
 
 if __name__ == '__main__':
