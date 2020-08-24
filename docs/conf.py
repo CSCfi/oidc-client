@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
 import sys
 import datetime
 
 import oidc_client
 from unittest.mock import MagicMock
-
+from pathlib import Path
 
 # Get the project root dir, which is the parent dir of this
-sys.path.insert(0, os.path.abspath('../oidc_client'))
+sys.path.insert(0, Path(__file__).resolve().parent.joinpath('oidc_client/'))
 
 # -- General configuration ------------------------------------------------
 
