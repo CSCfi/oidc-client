@@ -188,8 +188,8 @@ async def validate_token(token):
     }
     try:
         # Decode the token and validate the contents
-        decodedData = jwt.decode(token, jwk, claims_options=claims_options)
-        decodedData.validate()
+        decoded_data = jwt.decode(token, jwk, claims_options=claims_options)
+        decoded_data.validate()
     except MissingClaimError as e:
         raise web.HTTPUnauthorized(text=f'Could not validate access token: Missing claim(s): {e}')
     except ExpiredTokenError as e:
