@@ -16,9 +16,7 @@ def parse_config_file(path):
         'app': {
             'host': os.environ.get('HOST', config.get('app', 'host')) or '0.0.0.0',  # nosec
             'port': os.environ.get('PORT', config.get('app', 'port')) or 8080,
-            'name': os.environ.get('NAME', config.get('app', 'name')) or 'oidc-client',
-            'ssl_certfile': os.environ.get('SSL_CERTFILE', config.get('app', 'ssl_certfile')) or '',
-            'ssl_keyfile': os.environ.get('SSL_KEYFILE', config.get('app', 'ssl_keyfile')) or ''
+            'name': os.environ.get('NAME', config.get('app', 'name')) or 'oidc-client'
         },
         'cookie': {
             'domain': os.environ.get('DOMAIN', config.get('cookie', 'domain')) or 'localhost',
