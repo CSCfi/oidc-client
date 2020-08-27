@@ -4,7 +4,7 @@ import urllib.parse
 
 from aiohttp import web
 
-from ..utils.utils import generate_state, save_to_cookies
+from ..utils.utils import generate_state, save_to_session
 from ..utils.logging import LOG
 from ..config import CONFIG
 
@@ -15,6 +15,9 @@ async def login_request(request):
 
     # Generate a state for callback
     state = await generate_state()
+
+    # Save state to session storage
+    await save_to_session(request, key='oidc_state', value=state)
 
     # Create parameters for authorisation request
     params = {
@@ -30,13 +33,6 @@ async def login_request(request):
 
     # Prepare response
     response = web.HTTPSeeOther(url)
-
-    # Save state to cookies
-    response = await save_to_cookies(response,
-                                     key='oidc_state',
-                                     value=state,
-                                     lifetime=CONFIG.cookie['state_lifetime'],
-                                     http_only=CONFIG.cookie['http_only'])
 
     # Redirect user to remote AAI server for authentication, this does a 303 redirect
     raise response

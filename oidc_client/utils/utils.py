@@ -6,6 +6,7 @@ import urllib.parse
 
 import aiohttp
 
+from aiohttp_session import get_session
 from aiohttp import web
 from aiocache import cached
 from aiocache.serializers import JsonSerializer
@@ -20,6 +21,30 @@ async def generate_state():
     """Generate a state for authentication request and return the value for use."""
     LOG.debug('Generate a new state for authentication request.')
     return secrets.token_hex()
+
+
+async def get_from_session(request, key):
+    """Get a desired value from session storage."""
+    LOG.debug(f'Retrieve value for {key} from session storage.')
+
+    session = await get_session(request)
+    try:
+        LOG.debug(f'Returning session value for: {key}.')
+        return session[key]
+    except KeyError as e:
+        LOG.error(f'Session has no value for {key}: {e}.')
+        raise web.HTTPUnauthorized(text='401 Uninitialised session.')
+    except Exception as e:
+        LOG.error(f'Failed to retrieve {key} from session: {e}')
+        raise web.HTTPInternalServerError(text=f'500 Session has failed: {e}')
+
+
+async def save_to_session(request, key='key', value='value'):
+    """Save a given value to a session key."""
+    LOG.debug(f'Save a value for {key} to session.')
+
+    session = await get_session(request)
+    session[key] = value
 
 
 async def get_from_cookies(request, key):

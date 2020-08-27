@@ -2,11 +2,15 @@
 
 import sys
 
+from cryptography.fernet import Fernet
 from aiohttp import web
+from aiohttp_session import setup as session_setup
+from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from .endpoints.login import login_request
 from .endpoints.logout import logout_request
 from .endpoints.callback import callback_request
+from .endpoints.token import token_request
 from .utils.logging import LOG
 from .config import CONFIG
 
@@ -40,12 +44,25 @@ async def callback(request):
     await callback_request(request)
 
 
+@routes.get('/token')
+async def token(request):
+    """Display token from session storage or cookies."""
+    LOG.info('Received request to GET /token.')
+    access_token = await token_request(request)
+    return web.json_response({'access_token': access_token})
+
+
 async def init():
     """Initialise web server."""
     LOG.info('Initialise web server.')
 
     # Initialise server object
     server = web.Application()
+
+    # Create encrypted session storage
+    # Encryption key must be a 32 byte base64-encoded Fernet key
+    session_setup(server,
+                  EncryptedCookieStorage(Fernet.generate_key()[:32]))
 
     # Gather endpoints
     server.router.add_routes(routes)
