@@ -122,50 +122,6 @@ async def query_params(request):
         raise web.HTTPBadRequest(text='AAI response is missing mandatory parameters.')
 
 
-async def check_bona_fide(token):
-    """Check if user is recognised as a Bona Fide researcher.
-
-    Bona Fide status is based on GA4GH RI claims specified in
-    https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/RI_Claims_V1.md
-
-    The exact requirements are described in
-    https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/RI_Claims_V1.md#registered-access
-    """
-    LOG.debug('Checking Bona Fide status.')
-
-    terms = False
-    status = False
-    headers = {"Authorization": f"Bearer {token}"}
-
-    async with aiohttp.ClientSession() as session:
-        # Send request to AAI
-        async with session.get(CONFIG.aai['url_userinfo'], headers=headers) as response:
-            LOG.debug(f'AAI response status: {response.status}.')
-            # Validate response from AAI
-            if response.status == 200:
-                # Parse response
-                result = await response.json()
-                # Check for Bona Fide values
-                ga4gh = result.get('ga4gh', {})
-                if 'AcceptedTermsAndPolicies' in ga4gh:
-                    for accepted_terms in ga4gh["AcceptedTermsAndPolicies"]:
-                        if accepted_terms.get("value") == CONFIG.elixir['bona_fide_value']:
-                            terms = True
-                if 'ResearcherStatus' in ga4gh:
-                    for researcher_status in ga4gh["ResearcherStatus"]:
-                        if researcher_status.get("value") == CONFIG.elixir['bona_fide_value']:
-                            status = True
-                if terms and status:
-                    # User has agreed to terms and has been recognized by a peer, return True for Bona Fide status
-                    return True
-                else:
-                    return False
-            else:
-                LOG.error(f'Userinfo request to AAI failed: {response}.')
-                LOG.error(await response.json())
-                raise web.HTTPBadRequest(text=f'Token request to AAI failed: {response.status}.')
-
-
 @cached(ttl=3600, key="jwk", serializer=JsonSerializer())
 async def get_jwk():
     """Get a key to decode access token with."""

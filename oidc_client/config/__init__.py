@@ -39,9 +39,6 @@ def parse_config_file(path):
             'aud': os.environ.get('AUD', config.get('aai', 'aud')) or None,
             'jwk': os.environ.get('JWK', config.get('aai', 'jwk')) or None,
             'jwk_server': os.environ.get('JWK_SERVER', config.get('aai', 'jwk_server')) or None
-        },
-        'elixir': {
-            'bona_fide_value': os.environ.get('BONA_FIDE_VALUE', config.get('elixir', 'bona_fide_value')) or ''
         }
     }
     return namedtuple("Config", config_vars.keys())(*config_vars.values())
