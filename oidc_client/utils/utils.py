@@ -1,6 +1,5 @@
 """General Utility Functions."""
 
-import os
 import secrets
 import urllib.parse
 
@@ -132,7 +131,8 @@ async def get_jwk():
             async with session.get(CONFIG.aai['jwk_server']) as r:
                 # This can be a single key or a list of JWK
                 return await r.json()
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
+        # cache is preventing the testing of this block. this block has been tested manually
         LOG.error(f'Could not retrieve JWK: {e}')
         raise web.HTTPInternalServerError(text="Could not retrieve public key.")
 

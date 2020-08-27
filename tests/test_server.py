@@ -43,6 +43,14 @@ class AppTestCase(AioHTTPTestCase):
         await self.client.request("GET", "/callback")
         mock_callback.assert_called()
 
+    @asynctest.mock.patch('oidc_client.app.token_request', return_value='token')
+    @unittest_run_loop
+    async def test_token(self, mock_token):
+        """Test token endpoint."""
+        response = await self.client.request("GET", "/token")
+        self.assertEqual(response.status, 200)
+        self.assertEqual(await response.json(), {'access_token': 'token'})
+
 
 class TestBasicFunctionsApp(unittest.TestCase):
     """Test web app."""

@@ -1,5 +1,6 @@
 import re
 
+import aiohttp
 import asynctest
 
 from collections import namedtuple
@@ -13,7 +14,7 @@ from multidict import MultiDict
 
 from oidc_client.utils.utils import generate_state, get_from_cookies, save_to_cookies
 from oidc_client.utils.utils import request_token, query_params, get_jwk, validate_token
-from oidc_client.utils.utils import revoke_token
+from oidc_client.utils.utils import revoke_token, get_from_session, save_to_session
 
 # Mock URLs in functions to replace the real request, checks for http/https/localhost in the beginning
 MOCK_URL = re.compile(r'^(http|localhost)')
@@ -206,6 +207,29 @@ class TestUtils(asynctest.TestCase):
         m.get(MOCK_URL, status=400)
         with self.assertRaises(web.HTTPBadRequest):
             await revoke_token('what')
+
+    @asynctest.mock.patch('oidc_client.utils.utils.get_session', return_value={})
+    async def test_save_to_session(self, m_session):
+        """Test saving to session."""
+        await save_to_session('request', key='hello', value='there')
+
+    @asynctest.mock.patch('oidc_client.utils.utils.get_session', return_value={'hello': 'there'})
+    async def test_get_from_session(self, m_session):
+        """Test reading from session."""
+        value = await get_from_session('request', 'hello')
+        self.assertEqual(value, 'there')
+
+    @asynctest.mock.patch('oidc_client.utils.utils.get_session', return_value={})
+    async def test_get_from_session_not_found(self, m_session):
+        """Test reading from session, key not found."""
+        with self.assertRaises(aiohttp.web_exceptions.HTTPUnauthorized):
+            await get_from_session('request', 'missing')
+
+    @asynctest.mock.patch('oidc_client.utils.utils.get_session', return_value=None)
+    async def test_get_from_session_error(self, m_session):
+        """Test reading from session, fatal session error."""
+        with self.assertRaises(aiohttp.web_exceptions.HTTPInternalServerError):
+            await get_from_session('request', 'error')
 
 
 if __name__ == '__main__':

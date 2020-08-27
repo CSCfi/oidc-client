@@ -1,12 +1,11 @@
 import asynctest
 
-from unittest.mock import patch
-
 from aiohttp import web
 
 from oidc_client.endpoints.login import login_request
 from oidc_client.endpoints.logout import logout_request
 from oidc_client.endpoints.callback import callback_request
+from oidc_client.endpoints.token import token_request
 
 from oidc_client.utils.utils import save_to_cookies
 
@@ -34,40 +33,36 @@ class MockResponse:
 class MockRequest:
     """Mocked request class for testing."""
 
-    def __init__(self, cookies, query):
+    def __init__(self, query):
         """Initialise object."""
-        self.cookies = cookies
         self.query = query
+
+    def get(self, key):
+        """For session key."""
+        return key
+
+
+class MockRedirect(Exception):
+    """Mocks HTTPException 303."""
+
+    def __init__(self):
+        """Initialise object."""
 
 
 class TestEndpoints(asynctest.TestCase):
     """Test endpoint processors."""
 
-    @patch('aiohttp.web.HTTPSeeOther')
-    @patch('oidc_client.endpoints.login.generate_state')
-    async def test_login_endpoint(self, m_state, m_response):
+    @asynctest.mock.patch('aiohttp.web.HTTPSeeOther')
+    @asynctest.mock.patch('oidc_client.endpoints.login.save_to_session')
+    @asynctest.mock.patch('oidc_client.endpoints.login.generate_state')
+    async def test_login_endpoint(self, m_state, m_save, m_response):
         """Test login endpoint processor."""
-        m_state.return_value = 5000
-        assert 5000 == m_state()
-        m_response.return_value = MockResponse()
-        # This test always passes
-        # url = 'https://aai.org/auth?client_id=public&response_type=code&state=5000&redirect_uri=localhost:5000&scope=openid%20ga4gh'
-        # assert m_response.called_with(url)
-        expected_cookies = {
-            'oidc_state': 5000,
-            'domain': 'localhost:8080',
-            'httponly': True,
-            'max_age': 3600,
-            'secure': True
-        }
-        m_response_with_cookies = await save_to_cookies(m_response(),
-                                                        key='oidc_state',
-                                                        value=m_state(),
-                                                        lifetime=3600,
-                                                        http_only=True)
-        assert m_response_with_cookies.cookies == expected_cookies
-        with self.assertRaises(web.HTTPSeeOther):
-            await login_request(web.Request)
+        m_state.return_value = '5000'
+        m_save.return_value = None
+        m_response.return_value = MockRedirect()
+        with self.assertRaises(MockRedirect):
+            mock_request = MockRequest(query={})
+            await login_request(mock_request)
 
     @asynctest.mock.patch('oidc_client.endpoints.logout.revoke_token')
     @asynctest.mock.patch('oidc_client.endpoints.logout.get_from_cookies')
@@ -79,26 +74,27 @@ class TestEndpoints(asynctest.TestCase):
         with self.assertRaises(web.HTTPSeeOther):
             await logout_request({})
 
+    @asynctest.mock.patch('oidc_client.endpoints.callback.save_to_session')
+    @asynctest.mock.patch('oidc_client.endpoints.callback.get_from_session')
     @asynctest.mock.patch('oidc_client.endpoints.callback.validate_token')
-    @asynctest.mock.patch('oidc_client.endpoints.callback.check_bona_fide')
     @asynctest.mock.patch('oidc_client.endpoints.callback.request_token')
-    async def test_callback_endpoint(self, m_token, m_bona, m_valid):
+    async def test_callback_endpoint(self, m_token, m_valid, m_session, m_save):
         """Test callback endpoint processor."""
         # Test bad request: request doesn't pass state validation
+        m_session.return_value = 5000
         bad_request = MockRequest(
-            cookies={'oidc_state': 5000},
             query={'state': 9999, 'code': 'malicious bunnies'}
         )
         with self.assertRaises(web.HTTPForbidden):
             await callback_request(bad_request)
         # Test good request: request passes state validation and does a redirect
+        m_session.return_value = 5000
         good_request = MockRequest(
-            cookies={'oidc_state': 5000},
             query={'state': 5000, 'code': 'fluffy bunnies'}
         )
         m_valid.return_value = True
+        m_save.return_value = None
         m_token.return_value = 'super.secret.token'
-        m_bona.return_value = True
         with self.assertRaises(web.HTTPSeeOther):
             await callback_request(good_request)
         # Test that access token is saved
@@ -116,6 +112,14 @@ class TestEndpoints(asynctest.TestCase):
                                                         lifetime=3600,
                                                         http_only=True)
         assert m_response_with_cookies.cookies == expected_cookies
+
+    @asynctest.mock.patch('oidc_client.endpoints.token.get_from_session')
+    async def test_token_endpoint(self, m_session):
+        """Test token endpoint processor."""
+        m_session.return_value = 'token'
+        mock_request = MockRequest(query={})
+        token = await token_request(mock_request)
+        self.assertEqual(token, 'token')
 
 
 if __name__ == '__main__':
