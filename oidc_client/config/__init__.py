@@ -37,7 +37,6 @@ def parse_config_file(path):
             'scope': os.environ.get('SCOPE', config.get('aai', 'scope')) or 'openid',
             'iss': os.environ.get('ISS', config.get('aai', 'iss')) or None,
             'aud': os.environ.get('AUD', config.get('aai', 'aud')) or None,
-            'jwk': os.environ.get('JWK', config.get('aai', 'jwk')) or None,
             'jwk_server': os.environ.get('JWK_SERVER', config.get('aai', 'jwk_server')) or None
         }
     }

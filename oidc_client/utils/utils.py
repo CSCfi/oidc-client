@@ -127,12 +127,6 @@ async def get_jwk():
     """Get a key to decode access token with."""
     LOG.debug('Retrieving JWK.')
 
-    # JWK can be fetched from environment instead of a server
-    key = os.environ.get('JWK', None)
-    if key is not None:
-        return key
-
-    # In other case, retrieve JWK from server
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(CONFIG.aai['jwk_server']) as r:

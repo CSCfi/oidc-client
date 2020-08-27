@@ -12,7 +12,7 @@ from authlib.jose import jwt
 from multidict import MultiDict
 
 from oidc_client.utils.utils import generate_state, get_from_cookies, save_to_cookies
-from oidc_client.utils.utils import request_token, query_params, check_bona_fide, get_jwk, validate_token
+from oidc_client.utils.utils import request_token, query_params, get_jwk, validate_token
 from oidc_client.utils.utils import revoke_token
 
 # Mock URLs in functions to replace the real request, checks for http/https/localhost in the beginning
@@ -147,50 +147,12 @@ class TestUtils(asynctest.TestCase):
             await query_params(miss_request)
 
     @aioresponses()
-    async def test_check_bona_fide(self, m):
-        """Test checking of Bona Fide status."""
-        # Bona fide OK
-        payload = {
-            'ga4gh': {
-                'AcceptedTermsAndPolicies': [
-                    {
-                        'value': 'bona_fide'
-                    }
-                ],
-                'ResearcherStatus': [
-                    {
-                        'value': 'bona_fide'
-                    }
-                ]
-            }
-        }
-        m.get(MOCK_URL, status=200, payload=payload)
-        bona_fide_status = await check_bona_fide("token")
-        assert bona_fide_status is True
-        # Bona fide not OK
-        m.get(MOCK_URL, status=200, payload={})
-        bona_fide_status = await check_bona_fide("token")
-        assert bona_fide_status is False
-        # Test failed request
-        m.get(MOCK_URL, status=400)
-        with self.assertRaises(web.HTTPBadRequest):
-            await check_bona_fide("token")
-
-    @aioresponses()
     async def test_get_jwk(self, m):
         """Test getting JWK."""
         # Test getting key from server
         m.get(MOCK_URL, status=200, payload={'hello': 'there'})
         key = await get_jwk()
         self.assertEqual({'hello': 'there'}, key)
-        # Test getting key from config
-        #
-        # Find a way to place a key into CONFIG
-        # CONFIG is created on startup, os.env is loaded on CONFIG creation, not in functions
-        # Failed attempts: mock.patch CONFIG.aai['jwk'].return_value, EnvironmentVarGuard
-        #
-        # key = await get_jwk()
-        # self.assertEqual('placeholder', key)
 
     @asynctest.mock.patch('oidc_client.utils.utils.get_jwk')
     async def test_validate_token(self, m_jwk):
