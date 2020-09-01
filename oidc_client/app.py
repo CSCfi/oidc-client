@@ -11,8 +11,7 @@ from .endpoints.login import login_request
 from .endpoints.logout import logout_request
 from .endpoints.callback import callback_request
 from .endpoints.token import token_request
-from .utils.logging import LOG
-from .config import CONFIG
+from .config import CONFIG, LOG
 
 routes = web.RouteTableDef()
 

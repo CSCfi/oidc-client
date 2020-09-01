@@ -5,8 +5,7 @@ import secrets
 from aiohttp import web
 
 from ..utils.utils import get_from_session, save_to_session, save_to_cookies, request_token, query_params, validate_token
-from ..config import CONFIG
-from ..utils.logging import LOG
+from ..config import CONFIG, LOG
 
 
 async def callback_request(request):

@@ -12,8 +12,7 @@ from aiocache.serializers import JsonSerializer
 from authlib.jose import jwt
 from authlib.jose.errors import MissingClaimError, InvalidClaimError, ExpiredTokenError, BadSignatureError
 
-from ..config import CONFIG
-from .logging import LOG
+from ..config import CONFIG, LOG
 
 
 async def generate_state():

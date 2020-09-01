@@ -3,8 +3,7 @@
 from aiohttp import web
 
 from ..utils.utils import get_from_cookies, revoke_token, save_to_cookies
-from ..config import CONFIG
-from ..utils.logging import LOG
+from ..config import CONFIG, LOG
 
 
 async def logout_request(request):

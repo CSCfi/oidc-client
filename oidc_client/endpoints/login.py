@@ -5,8 +5,7 @@ import urllib.parse
 from aiohttp import web
 
 from ..utils.utils import generate_state, save_to_session
-from ..utils.logging import LOG
-from ..config import CONFIG
+from ..config import CONFIG, LOG
 
 
 async def login_request(request):
