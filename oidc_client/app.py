@@ -17,41 +17,41 @@ routes = web.RouteTableDef()
 
 
 @routes.get('/')
-async def index(request):
+async def index(request: web.Request) -> web.Response:
     """Greeting endpoint."""
     return web.Response(body=CONFIG.app['name'])
 
 
 @routes.get('/login')
-async def login(request):
+async def login(request: web.Request):
     """Log user in by authenticating at AAI Server."""
     LOG.info('Received request to GET /login.')
     await login_request(request)
 
 
 @routes.get('/logout')
-async def logout(request):
+async def logout(request: web.Request):
     """Log user out by destroying session at oidc-client and revoking access token at AAI server."""
     LOG.info('Received request to GET /logout.')
     await logout_request(request)
 
 
 @routes.get('/callback')
-async def callback(request):
+async def callback(request: web.Request):
     """Receive callback from AAI server after authentication."""
     LOG.info('Received request to GET /callback.')
     await callback_request(request)
 
 
 @routes.get('/token')
-async def token(request):
+async def token(request: web.Request) -> web.Response:
     """Display token from session storage or cookies."""
     LOG.info('Received request to GET /token.')
     access_token = await token_request(request)
     return web.json_response({'access_token': access_token})
 
 
-async def init():
+async def init() -> web.Application:
     """Initialise web server."""
     LOG.info('Initialise web server.')
 
@@ -69,7 +69,7 @@ async def init():
     return server
 
 
-def main():
+def main() -> None:
     """Start web server."""
     LOG.info('Start web server.')
     web.run_app(init(),

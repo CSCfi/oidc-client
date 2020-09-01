@@ -6,7 +6,7 @@ from ..utils.utils import get_from_cookies, revoke_token, save_to_cookies
 from ..config import CONFIG, LOG
 
 
-async def logout_request(request):
+async def logout_request(request: web.Request) -> web.HTTPSeeOther:
     """Handle logout requests."""
     LOG.debug('Handle logout request.')
 

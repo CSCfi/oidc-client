@@ -8,7 +8,7 @@ from ..utils.utils import get_from_session, save_to_session, save_to_cookies, re
 from ..config import CONFIG, LOG
 
 
-async def callback_request(request):
+async def callback_request(request: web.Request) -> web.HTTPSeeOther:
     """Handle callback requests."""
     LOG.debug('Handle callback request.')
 

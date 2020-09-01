@@ -24,3 +24,7 @@ jobs:
         pip install tox tox-gh-actions
     - name: Flake8 syntax check
       run: tox -e flake8
+    - name: Test function types
+      run: tox -e mypy
+    - name: Static vulnerability check
+      run: tox -e bandit

@@ -15,13 +15,13 @@ from authlib.jose.errors import MissingClaimError, InvalidClaimError, ExpiredTok
 from ..config import CONFIG, LOG
 
 
-async def generate_state():
+async def generate_state() -> str:
     """Generate a state for authentication request and return the value for use."""
     LOG.debug('Generate a new state for authentication request.')
     return secrets.token_hex()
 
 
-async def get_from_session(request, key):
+async def get_from_session(request: web.Request, key: str) -> str:
     """Get a desired value from session storage."""
     LOG.debug(f'Retrieve value for {key} from session storage.')
 
@@ -37,7 +37,7 @@ async def get_from_session(request, key):
         raise web.HTTPInternalServerError(text=f'500 Session has failed: {e}')
 
 
-async def save_to_session(request, key='key', value='value'):
+async def save_to_session(request: web.Request, key: str = 'key', value: str = 'value') -> None:
     """Save a given value to a session key."""
     LOG.debug(f'Save a value for {key} to session.')
 
@@ -45,7 +45,7 @@ async def save_to_session(request, key='key', value='value'):
     session[key] = value
 
 
-async def get_from_cookies(request, key):
+async def get_from_cookies(request: web.Request, key: str) -> str:
     """Get a desired value from cookies."""
     LOG.debug(f'Retrieve value for {key} from cookies.')
 
@@ -60,7 +60,7 @@ async def get_from_cookies(request, key):
         raise web.HTTPInternalServerError(text=f'500 Session has failed: {e}')
 
 
-async def save_to_cookies(response, key='key', value='value', http_only=True, lifetime=300):
+async def save_to_cookies(response: web.HTTPSeeOther, key: str = 'key', value: str = 'value', http_only=True, lifetime: int = 300) -> web.HTTPSeeOther:
     """Save a given value to cookies."""
     LOG.debug(f'Save a value for {key} to cookies.')
 
@@ -74,7 +74,7 @@ async def save_to_cookies(response, key='key', value='value', http_only=True, li
     return response
 
 
-async def request_token(code):
+async def request_token(code: str) -> str:
     """Request token from AAI."""
     LOG.debug('Requesting token.')
 
@@ -107,7 +107,7 @@ async def request_token(code):
                 raise web.HTTPBadRequest(text=f'Token request to AAI failed: {response.status}.')
 
 
-async def query_params(request):
+async def query_params(request: web.Request) -> dict:
     """Parse query string params from path."""
     LOG.debug('Parse query params from AAI response.')
 
@@ -121,7 +121,7 @@ async def query_params(request):
 
 
 @cached(ttl=3600, key="jwk", serializer=JsonSerializer())
-async def get_jwk():
+async def get_jwk() -> dict:
     """Get a key to decode access token with."""
     LOG.debug('Retrieving JWK.')
 
@@ -136,7 +136,7 @@ async def get_jwk():
         raise web.HTTPInternalServerError(text="Could not retrieve public key.")
 
 
-async def validate_token(token):
+async def validate_token(token: str) -> None:
     """Validate JWT."""
     LOG.debug('Validating access token.')
 
@@ -174,7 +174,7 @@ async def validate_token(token):
         raise web.HTTPForbidden(text=f'Could not validate access token: Token signature could not be verified: {e}')
 
 
-async def revoke_token(token):
+async def revoke_token(token: str) -> None:
     """Request token revocation at AAI."""
     LOG.debug('Revoking token.')
 

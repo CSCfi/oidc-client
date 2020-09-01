@@ -8,7 +8,7 @@ from ..utils.utils import generate_state, save_to_session
 from ..config import CONFIG, LOG
 
 
-async def login_request(request):
+async def login_request(request: web.Request) -> web.Response:
     """Handle login requests."""
     LOG.debug('Handle login request.')
 
