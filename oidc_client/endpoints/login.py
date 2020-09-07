@@ -10,21 +10,21 @@ from ..config import CONFIG, LOG
 
 async def login_request(request: web.Request) -> web.Response:
     """Handle login requests."""
-    LOG.debug('Handle login request.')
+    LOG.debug("Handle login request.")
 
     # Generate a state for callback
     state = await generate_state()
 
     # Save state to session storage
-    await save_to_session(request, key='oidc_state', value=state)
+    await save_to_session(request, key="oidc_state", value=state)
 
     # Create parameters for authorisation request
     params = {
-        'client_id': CONFIG.aai['client_id'],
-        'response_type': 'code',
-        'state': state,
-        'redirect_uri': CONFIG.aai['url_callback'],
-        'scope': ' '.join(CONFIG.aai['scope'].split(','))
+        "client_id": CONFIG.aai["client_id"],
+        "response_type": "code",
+        "state": state,
+        "redirect_uri": CONFIG.aai["url_callback"],
+        "scope": " ".join(CONFIG.aai["scope"].split(",")),
     }
 
     # Craft authorisation URL
