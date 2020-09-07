@@ -16,52 +16,51 @@ from .config import CONFIG, LOG
 routes = web.RouteTableDef()
 
 
-@routes.get('/')
+@routes.get("/")
 async def index(request: web.Request) -> web.Response:
     """Greeting endpoint."""
-    return web.Response(body=CONFIG.app['name'])
+    return web.Response(body=CONFIG.app["name"])
 
 
-@routes.get('/login')
+@routes.get("/login")
 async def login(request: web.Request):
     """Log user in by authenticating at AAI Server."""
-    LOG.info('Received request to GET /login.')
+    LOG.info("Received request to GET /login.")
     await login_request(request)
 
 
-@routes.get('/logout')
+@routes.get("/logout")
 async def logout(request: web.Request):
     """Log user out by destroying session at oidc-client and revoking access token at AAI server."""
-    LOG.info('Received request to GET /logout.')
+    LOG.info("Received request to GET /logout.")
     await logout_request(request)
 
 
-@routes.get('/callback')
+@routes.get("/callback")
 async def callback(request: web.Request):
     """Receive callback from AAI server after authentication."""
-    LOG.info('Received request to GET /callback.')
+    LOG.info("Received request to GET /callback.")
     await callback_request(request)
 
 
-@routes.get('/token')
+@routes.get("/token")
 async def token(request: web.Request) -> web.Response:
     """Display token from session storage or cookies."""
-    LOG.info('Received request to GET /token.')
+    LOG.info("Received request to GET /token.")
     access_token = await token_request(request)
-    return web.json_response({'access_token': access_token})
+    return web.json_response({"access_token": access_token})
 
 
 async def init() -> web.Application:
     """Initialise web server."""
-    LOG.info('Initialise web server.')
+    LOG.info("Initialise web server.")
 
     # Initialise server object
     server = web.Application()
 
     # Create encrypted session storage
     # Encryption key must be a 32 byte base64-encoded Fernet key
-    session_setup(server,
-                  EncryptedCookieStorage(Fernet.generate_key()[:32]))
+    session_setup(server, EncryptedCookieStorage(Fernet.generate_key()[:32]))
 
     # Gather endpoints
     server.router.add_routes(routes)
@@ -71,16 +70,13 @@ async def init() -> web.Application:
 
 def main() -> None:
     """Start web server."""
-    LOG.info('Start web server.')
-    web.run_app(init(),
-                host=CONFIG.app['host'],
-                port=CONFIG.app['port'],
-                shutdown_timeout=0)
+    LOG.info("Start web server.")
+    web.run_app(init(), host=CONFIG.app["host"], port=CONFIG.app["port"], shutdown_timeout=0)
 
 
-if __name__ == '__main__':
-    LOG.info('Starting OIDC Client Web API.')
+if __name__ == "__main__":
+    LOG.info("Starting OIDC Client Web API.")
     if sys.version_info < (3, 6):
-        LOG.error('oidc-client requires python 3.6+')
+        LOG.error("oidc-client requires python 3.6+")
         sys.exit(1)
     main()
