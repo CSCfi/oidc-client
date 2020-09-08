@@ -74,13 +74,6 @@ To build OIDC Client into an image using ``s2i``:
 
     s2i build . centos/python-36-centos7 cscfi/oidc-client
 
-To build OIDC Client into an image using ``docker`` (NOT YET IMPLEMENTED)
-
-.. code-block:: console
-
-    # Dockerfile not yet written, this feature is not yet implemented!!
-    docker build -t cscfi/oidc-client .
-
 To run the built image with docker:
 
 .. code-block:: console

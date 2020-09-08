@@ -19,5 +19,8 @@ exclude_lines =
     if __name__ == .__main__.:
     if not args:
 
+    # Dont test lines with this comment
+    pragma: no cover
+
 
 ignore_errors = True

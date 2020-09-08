@@ -1,7 +1,7 @@
 API Endpoints
 =============
 
-OIDC Client consists of four endpoints: ``/``, ``/login``, ``/logout``, ``/callback``.
+OIDC Client consists of five endpoints: ``/``, ``/login``, ``/logout``, ``/callback`` and ``/token``.
 
 .. _index:
 
@@ -30,21 +30,24 @@ Upon returning to the OIDC Client from the AAI server, OIDC Client extracts ``st
 and uses these values to request a token from the AAI server. Upon a successful retrieval of an access token, the access token
 is saved to the browser cookies.
 
-Some of the created cookies can be considered _unsafe_ (not `http_only`) for the purpose of displaying values in UI for logged in state and bona fide status.
+Some of the created cookies can be considered _unsafe_ (not `http_only`) for the purpose of displaying values in UI for logged in state.
+
+Token
+~~~~~
+
+Display token from encrypted session storage for easy retrieval. Alternate way to inspect the access token is to look at the browser cookies.
 
 Cookies
 ~~~~~~~
 
 Cookies created and used by the OIDC Client and their default settings.
 
-+---------------+-----------+----------------------------------------------------+----------+--------+-----------+
-| Cookie        | Origin    | Purpose                                            | Lifetime | Secure | Http Only |
-+===============+===========+====================================================+==========+========+===========+
-| oidc_state    | /login    | Store state at login to be checked upon callback   | 5 min    | True   | True      |
-+---------------+-----------+----------------------------------------------------+----------+--------+-----------+
-| access_token  | /callback | Sent along requests for authorizing access to data | 1 hour   | True   | True      |
-+---------------+-----------+----------------------------------------------------+----------+--------+-----------+
-| logged_in     | /callback | Used to display logged in state in UI              | 1 hour   | True   | False     |
-+---------------+-----------+----------------------------------------------------+----------+--------+-----------+
-| bona_fide     | /callback | Used to display bona fide status in UI             | 1 hour   | True   | False     |
-+---------------+-----------+----------------------------------------------------+----------+--------+-----------+
++-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
+| Cookie          | Origin    | Purpose                                                                                                             | Lifetime | Secure | Http Only |
++-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
+| AIOHTTP_SESSION | /login    | Store state at login to be checked upon callback. Store access token at callback to be displayed at token endpoint. | Session  | True   | True      |
++-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
+| access_token    | /callback | Sent along same-domain requests for authorizing access to data                                                      | 1 hour   | True   | True      |
++-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
+| logged_in       | /callback | Used to display logged in state in UI                                                                               | 1 hour   | True   | False     |
++-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
