@@ -1,7 +1,7 @@
 """OIDC Client."""
 
 __title__ = "oidc_client"
-__version__ = VERSION = "0.1.0"
+__version__ = VERSION = "1.0.0"
 __author__ = "CSC developers"
 __license__ = "Apache License 2.0"
 __copyright__ = "CSC - IT Center for Science"
