@@ -1,7 +1,7 @@
 ## OIDC Client
 
 ![Python Unit Tests](https://github.com/CSCfi/oidc-client/workflows/Python%20Unit%20Tests/badge.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/CSCfi/oidc-client/badge.svg)](https://coveralls.io/github/CSCfi/oidc-client)
+[![Coverage Status](https://coveralls.io/repos/github/CSCfi/oidc-client/badge.svg?branch=HEAD)](https://coveralls.io/github/CSCfi/oidc-client?branch=HEAD)
 [![Documentation Status](https://readthedocs.org/projects/csc-oidc-client/badge/?version=latest)](https://csc-oidc-client.readthedocs.io/en/latest/?badge=latest)
 
 CSC OIDC Client is a lightweight [aiohttp](https://aiohttp.readthedocs.io/en/stable/) web application used for interacting with OIDC servers.
