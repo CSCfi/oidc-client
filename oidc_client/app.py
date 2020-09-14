@@ -2,7 +2,6 @@
 
 import sys
 
-from cryptography.fernet import Fernet
 from aiohttp import web
 from aiohttp_session import setup as session_setup
 from aiohttp_session.cookie_storage import EncryptedCookieStorage
@@ -59,8 +58,8 @@ async def init() -> web.Application:
     server = web.Application()
 
     # Create encrypted session storage
-    # Encryption key must be a 32 byte base64-encoded Fernet key
-    session_setup(server, EncryptedCookieStorage(Fernet.generate_key()[:32]))
+    # Encryption key must be 32 len bytes
+    session_setup(server, EncryptedCookieStorage(CONFIG.app["session_key"].encode()))
 
     # Gather endpoints
     server.router.add_routes(routes)
