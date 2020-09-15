@@ -1,6 +1,7 @@
 """OIDC Client Configuration."""
 
 import os
+import secrets
 import logging
 
 from pathlib import Path
@@ -22,6 +23,7 @@ def parse_config_file(path):
             "host": os.environ.get("HOST", config.get("app", "host")) or "0.0.0.0",  # nosec
             "port": os.environ.get("PORT", config.get("app", "port")) or 8080,
             "name": os.environ.get("NAME", config.get("app", "name")) or "oidc-client",
+            "session_key": os.environ.get("SESSION_KEY", config.get("app", "session_key")) or secrets.token_hex(16),
         },
         "cookie": {
             "domain": os.environ.get("DOMAIN", config.get("cookie", "domain")) or "localhost",
