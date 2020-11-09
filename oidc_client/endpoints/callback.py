@@ -4,7 +4,7 @@ import secrets
 
 from aiohttp import web
 
-from ..utils.utils import get_from_session, save_to_session, save_to_cookies, request_tokens, query_params, validate_token, revoke_token
+from ..utils.utils import get_from_session, save_to_session, save_to_cookies, request_tokens, query_params, validate_token
 from ..config import CONFIG, LOG
 
 
@@ -28,10 +28,6 @@ async def callback_request(request: web.Request) -> web.HTTPSeeOther:
     # Validate tokens
     await validate_token(tokens["access_token"])
     await validate_token(tokens["id_token"])  # validated but not saved or used
-    if CONFIG.aai["url_revoke"]:
-        # Some OIDC OPs don't provide a logout endpoint, so we first check if it's configured before trying to revoke the token
-        # We want to revoke the id_token because we don't use it for anything, and we don't want to leave user data hanging
-        await revoke_token(tokens["id_token"])
 
     # Save access token to session storage
     await save_to_session(request, key="access_token", value=tokens["access_token"])
