@@ -69,7 +69,7 @@ async def save_to_cookies(response: web.HTTPSeeOther, key: str = "key", value: s
     return response
 
 
-async def request_tokens(code: str) -> str:
+async def request_tokens(code: str) -> dict:
     """Request tokens from AAI."""
     LOG.debug("Requesting tokens.")
 
