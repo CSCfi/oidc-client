@@ -66,12 +66,14 @@ class TestEndpoints(asynctest.TestCase):
         with self.assertRaises(web.HTTPSeeOther):
             await logout_request({})
 
+    @asynctest.mock.patch("oidc_client.endpoints.callback.revoke_token")
     @asynctest.mock.patch("oidc_client.endpoints.callback.save_to_session")
     @asynctest.mock.patch("oidc_client.endpoints.callback.get_from_session")
     @asynctest.mock.patch("oidc_client.endpoints.callback.validate_token")
     @asynctest.mock.patch("oidc_client.endpoints.callback.request_tokens")
-    async def test_callback_endpoint(self, m_token, m_valid, m_session, m_save):
+    async def test_callback_endpoint(self, m_token, m_valid, m_session, m_save, m_revoke):
         """Test callback endpoint processor."""
+        m_revoke.return_value = True
         # Test bad request: request doesn't pass state validation
         m_session.return_value = 5000
         bad_request = MockRequest(query={"state": 9999, "code": "malicious bunnies"})
