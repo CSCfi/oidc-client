@@ -69,9 +69,9 @@ async def save_to_cookies(response: web.HTTPSeeOther, key: str = "key", value: s
     return response
 
 
-async def request_token(code: str) -> str:
-    """Request token from AAI."""
-    LOG.debug("Requesting token.")
+async def request_tokens(code: str) -> str:
+    """Request tokens from AAI."""
+    LOG.debug("Requesting tokens.")
 
     auth = aiohttp.BasicAuth(login=CONFIG.aai["client_id"], password=CONFIG.aai["client_secret"])
     data = {"grant_type": "authorization_code", "code": code, "redirect_uri": CONFIG.aai["url_callback"]}
@@ -85,13 +85,13 @@ async def request_token(code: str) -> str:
             if response.status == 200:
                 # Parse response
                 result = await response.json()
-                # Look for access token
-                if "access_token" in result:
-                    LOG.debug("Access token received.")
-                    return result["access_token"]
+                # Look for id token and access token
+                if "id_token" in result and "access_token" in result:
+                    LOG.debug("Tokens received.")
+                    return result
                 else:
-                    LOG.error("AAI response did not contain an access token.")
-                    raise web.HTTPBadRequest(text="AAI response did not contain an access token.")
+                    LOG.error(f"AAI response did not contain required tokens. id_token={result.get('id_token')}, access_token={result.get('access_token')}")
+                    raise web.HTTPBadRequest(text="AAI response did not contain required tokens.")
             else:
                 LOG.error(f"Token request to AAI failed: {response}.")
                 LOG.error(await response.json())
@@ -129,7 +129,7 @@ async def get_jwk() -> dict:
 
 async def validate_token(token: str) -> None:
     """Validate JWT."""
-    LOG.debug("Validating access token.")
+    LOG.debug("Validating token.")
 
     # Get JWK to decode the token with
     jwk = await get_jwk()

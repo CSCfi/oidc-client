@@ -69,7 +69,7 @@ class TestEndpoints(asynctest.TestCase):
     @asynctest.mock.patch("oidc_client.endpoints.callback.save_to_session")
     @asynctest.mock.patch("oidc_client.endpoints.callback.get_from_session")
     @asynctest.mock.patch("oidc_client.endpoints.callback.validate_token")
-    @asynctest.mock.patch("oidc_client.endpoints.callback.request_token")
+    @asynctest.mock.patch("oidc_client.endpoints.callback.request_tokens")
     async def test_callback_endpoint(self, m_token, m_valid, m_session, m_save):
         """Test callback endpoint processor."""
         # Test bad request: request doesn't pass state validation
@@ -82,13 +82,14 @@ class TestEndpoints(asynctest.TestCase):
         good_request = MockRequest(query={"state": 5000, "code": "fluffy bunnies"})
         m_valid.return_value = True
         m_save.return_value = None
-        m_token.return_value = "super.secret.token"
+        m_token.return_value = {"access_token": "super.secret.token", "id_token": "hi"}
         with self.assertRaises(web.HTTPSeeOther):
             await callback_request(good_request)
         # Test that access token is saved
         mock_response = MockResponse()
         expected_cookies = {"access_token": "super.secret.token", "domain": "localhost:8080", "httponly": True, "max_age": 3600, "secure": True}
-        m_response_with_cookies = await save_to_cookies(mock_response, key="access_token", value=await m_token(), lifetime=3600, http_only=True)
+        tokens = await m_token()
+        m_response_with_cookies = await save_to_cookies(mock_response, key="access_token", value=tokens["access_token"], lifetime=3600, http_only=True)
         assert m_response_with_cookies.cookies == expected_cookies
 
     @asynctest.mock.patch("oidc_client.endpoints.token.get_from_session")

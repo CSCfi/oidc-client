@@ -13,7 +13,7 @@ from authlib.jose import jwt
 from multidict import MultiDict
 
 from oidc_client.utils.utils import generate_state, get_from_cookies, save_to_cookies
-from oidc_client.utils.utils import request_token, query_params, get_jwk, validate_token
+from oidc_client.utils.utils import request_tokens, query_params, get_jwk, validate_token
 from oidc_client.utils.utils import revoke_token, get_from_session, save_to_session
 
 # Mock URLs in functions to replace the real request, checks for http/https/localhost in the beginning
@@ -86,20 +86,21 @@ class TestUtils(asynctest.TestCase):
         assert response_with_cookies.cookies == expected_cookies
 
     @aioresponses()
-    async def test_request_token(self, m):
+    async def test_request_tokens(self, m):
         """Test token request."""
         # Test token received
-        m.post(MOCK_URL, status=200, payload={"access_token": "secret"})
-        token = await request_token("123")
-        assert token == "secret"
+        m.post(MOCK_URL, status=200, payload={"access_token": "secret", "id_token": "hi"})
+        tokens = await request_tokens("123")
+        assert tokens["id_token"] == "hi"
+        assert tokens["access_token"] == "secret"
         # Test request OK, but token not received
         m.post(MOCK_URL, status=200, payload={})
         with self.assertRaises(web.HTTPBadRequest):
-            await request_token("123")
+            await request_tokens("123")
         # Test failed request
         m.post(MOCK_URL, status=400)
         with self.assertRaises(web.HTTPBadRequest):
-            await request_token("123")
+            await request_tokens("123")
 
     async def test_query_params(self):
         """Test parsing of query params."""
