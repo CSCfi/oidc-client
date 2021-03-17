@@ -14,4 +14,4 @@ pycparser==2.20
 six==1.15.0
 typing-extensions==3.7.4.3
 uvloop==0.14.0
-yarl==1.5.1
+yarl==1.6.3
