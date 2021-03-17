@@ -3,7 +3,7 @@ aiohttp==3.7.4
 aiohttp-session==2.9.0
 async-timeout==3.0.1
 attrs==20.3.0
-Authlib==0.14.3
+Authlib==0.15.3
 cffi==1.14.2
 chardet==3.0.4
 cryptography==3.3.2
