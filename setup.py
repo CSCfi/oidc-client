@@ -33,7 +33,7 @@ setup(
     install_requires=["aiohttp", "gunicorn", "uvloop", "authlib", "aiocache"],
     extras_require={
         "test": [
-            "coverage==4.5.4",
+            "coverage==5.5",
             "pytest<6.3",
             "pytest-cov",
             "coveralls",
