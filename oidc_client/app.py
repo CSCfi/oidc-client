@@ -3,8 +3,6 @@
 import sys
 
 from aiohttp import web
-from aiohttp_session import setup as session_setup
-from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 from .endpoints.login import login_request
 from .endpoints.logout import logout_request
@@ -56,10 +54,6 @@ async def init() -> web.Application:
 
     # Initialise server object
     server = web.Application()
-
-    # Create encrypted session storage
-    # Encryption key must be 32 len bytes
-    session_setup(server, EncryptedCookieStorage(CONFIG.app["session_key"].encode()))
 
     # Gather endpoints
     server.router.add_routes(routes)

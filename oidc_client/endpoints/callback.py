@@ -4,7 +4,7 @@ import secrets
 
 from aiohttp import web
 
-from ..utils.utils import get_from_session, save_to_session, save_to_cookies, request_token, query_params, validate_token
+from ..utils.utils import get_from_cookies, save_to_cookies, request_token, query_params, validate_token
 from ..config import CONFIG, LOG
 
 
@@ -13,7 +13,7 @@ async def callback_request(request: web.Request) -> web.HTTPSeeOther:
     LOG.debug("Handle callback request.")
 
     # Read saved state from session storage
-    state = await get_from_session(request, "oidc_state")
+    state = await get_from_cookies(request, "oidc_state")
 
     # Parse authorised state from AAI response
     params = await query_params(request)
@@ -26,10 +26,15 @@ async def callback_request(request: web.Request) -> web.HTTPSeeOther:
     access_token = await request_token(params["code"])
 
     # Validate access token
-    await validate_token(access_token)
-
-    # Save access token to session storage
-    await save_to_session(request, key="access_token", value=access_token)
+    if access_token.count(".") == 2:
+        # Validate token if it is a JWT
+        await validate_token(access_token)
+    elif CONFIG.aai["token_type"] == "opaque":
+        # If the token is not a JWT, expect it to be an opaque token and continue
+        pass
+    else:
+        # Unexpected token format, don't know what to do, so abort here
+        raise web.HTTPBadRequest(text="400 Unexpected token format.")
 
     # Prepare response
     response = web.HTTPSeeOther(CONFIG.aai["url_redirect"])

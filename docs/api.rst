@@ -45,8 +45,6 @@ Cookies created and used by the OIDC Client and their default settings.
 +-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
 | Cookie          | Origin    | Purpose                                                                                                             | Lifetime | Secure | Http Only |
 +-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
-| AIOHTTP_SESSION | /login    | Store state at login to be checked upon callback. Store access token at callback to be displayed at token endpoint. | Session  | True   | True      |
-+-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
 | access_token    | /callback | Sent along same-domain requests for authorizing access to data                                                      | 1 hour   | True   | True      |
 +-----------------+-----------+---------------------------------------------------------------------------------------------------------------------+----------+--------+-----------+
 | logged_in       | /callback | Used to display logged in state in UI                                                                               | 1 hour   | True   | False     |

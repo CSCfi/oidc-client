@@ -25,7 +25,7 @@ Application Configuration
 
 .. literalinclude:: /../oidc_client/config/config.ini
    :language: python
-   :lines: 17-33
+   :lines: 17-28
 
 .. _cookie-conf:
 
@@ -34,7 +34,7 @@ Cookie Settings
 
 .. literalinclude:: /../oidc_client/config/config.ini
    :language: python
-   :lines: 35-52
+   :lines: 30-47
 
 .. _aai-conf:
 
@@ -43,7 +43,7 @@ AAI Server Configuration
 
 .. literalinclude:: /../oidc_client/config/config.ini
    :language: python
-   :lines: 54-92
+   :lines: 49-90
 
 .. _env:
 
