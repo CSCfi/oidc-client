@@ -4,7 +4,7 @@ import secrets
 
 from aiohttp import web
 
-from ..utils.utils import get_from_session, save_to_session, save_to_cookies, request_token, query_params, validate_token
+from ..utils.utils import get_from_cookies, save_to_cookies, request_token, query_params, validate_token
 from ..config import CONFIG, LOG
 
 
@@ -13,7 +13,7 @@ async def callback_request(request: web.Request) -> web.HTTPSeeOther:
     LOG.debug("Handle callback request.")
 
     # Read saved state from session storage
-    state = await get_from_session(request, "oidc_state")
+    state = await get_from_cookies(request, "oidc_state")
 
     # Parse authorised state from AAI response
     params = await query_params(request)
@@ -27,9 +27,6 @@ async def callback_request(request: web.Request) -> web.HTTPSeeOther:
 
     # Validate access token
     await validate_token(access_token)
-
-    # Save access token to session storage
-    await save_to_session(request, key="access_token", value=access_token)
 
     # Prepare response
     response = web.HTTPSeeOther(CONFIG.aai["url_redirect"])
