@@ -15,4 +15,4 @@ six==1.16.0
 typing-extensions==3.10.0.0
 uvloop==0.14.0; python_version < '3.7'
 uvloop==0.15.2; python_version >= '3.7'
-yarl==1.6.3
+yarl==1.7.0
