@@ -3,7 +3,7 @@ aiohttp==3.7.4.post0
 aiohttp-session==2.9.0
 async-timeout==3.0.1
 attrs==20.3.0
-Authlib==0.15.3
+Authlib==0.15.5
 cffi==1.14.5
 chardet==4.0.0
 gunicorn==20.1.0
